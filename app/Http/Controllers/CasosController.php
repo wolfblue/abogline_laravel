@@ -1,0 +1,439 @@
+<?php
+
+//  Obtener datos del caso: POST getDataCaso
+//  Actualizar información de un caso: POST casosUpdate
+
+namespace App\Http\Controllers;
+
+use App\casos;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class CasosController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\casos  $casos
+     * @return \Illuminate\Http\Response
+     */
+    public function show(casos $casos)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\casos  $casos
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(casos $casos)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\casos  $casos
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, casos $casos)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\casos  $casos
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(casos $casos)
+    {
+        //
+    }
+
+    /**
+     * Actualizar información del caso
+     */
+
+    public function casosUpdate(Request $request){
+
+        try{
+
+            //  Variables iniciales
+
+            $id = $request->id;
+            $email = $request->email;
+            $field1 = $request->field1;
+            $field2 = $request->field2;
+            $field3 = $request->field3;
+            $field4 = $request->field4;
+            $field5 = $request->field5;
+            $field6 = $request->field6;
+            $field7 = $request->field7;
+
+            //  Validar si es nuevo registro o actualización
+
+            if($id == 0){
+
+                //  Consultar siguiente consecutivo
+
+                $sqlString = "
+                    SELECT
+                        CASE WHEN MAX(id) IS NULL THEN
+                            1
+                        ELSE
+                            MAX(id)+1
+                        END AS id
+                    FROM
+                        casos
+                ";
+
+                $sql = DB::select($sqlString);
+
+                foreach($sql as $result)
+                    $id = $result->id;
+
+                //  Nuevo registro
+
+                $sqlString = "
+                    INSERT INTO casos VALUES (
+                        '".$id."',
+                        now(),
+                        now(),
+                        '1',
+                        '".$email."',
+                        '".$field1."',
+                        '".$field2."',
+                        '".$field3."',
+                        '".$field4."',
+                        '".$field5."',
+                        '".$field6."',
+                        '".$field7."'
+                    )
+                ";
+
+                DB::insert($sqlString);
+
+            }else{
+
+                //  Actualización
+
+                $sqlString = "
+                    UPDATE casos SET
+                        updated_at = now(),
+                        field1 = '".$field1."',
+                        field2 = '".$field2."',
+                        field3 = '".$field3."',
+                        field4 = '".$field4."',
+                        field5 = '".$field5."',
+                        field6 = '".$field6."',
+                        field7 = '".$field7."'
+                    WHERE
+                        id = '".$id."'
+                ";
+
+                DB::update($sqlString);
+
+            }
+
+            return response()->json(true);
+
+        }catch (Exception $e) {}
+
+    }
+
+    /************************************************************************** */
+
+    /**
+     * Obtener datos del caso
+     */
+
+    public function getDataCaso(Request $request){
+
+        //  Variables iniciales
+
+        $casos = array();
+        $email = $request->email;
+        $where = "";
+
+        //  Validar parametros
+
+        if($email)
+            $where .= " AND a.email = '$email'";
+
+        try{
+
+            //  Consultar casos
+
+            $sqlString = "
+                SELECT 
+                    a.*,
+                    case when b.email is null then '' else b.email end as abogado
+                FROM 
+                    casos a LEFT JOIN procesos b ON a.id = b.id_caso
+                WHERE 
+                    a.active = '1' $where
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result){
+
+                //  Field 1 descripción
+
+                $field1Desc = "";
+
+                switch($result->field1){
+                    
+                    case "1":
+                        $field1Desc = "El estado (Toda entidad pública u organismo adscrito a los gobiernos nacionales regionales y/o locales)";
+                    break;
+
+                    case "2":
+                        $field1Desc = "Un particular o empresa privada (Tu jefe, un amigo, tu familia, conocidos, tu jefe y empresas que son privadas)";
+                    break;
+
+                }
+
+                //  Field 2 descripción
+
+                $field2Desc = "";
+
+                switch($result->field2){
+                    
+                    case "1":
+                        $field2Desc = "Con tu empleo en una entidad pública";
+                    break;
+
+                    case "2":
+                        $field2Desc = "Con tus impuestos";
+                    break;
+
+                    case "3":
+                        $field2Desc = "Con tu negocio";
+                    break;
+
+                    case "4":
+                        $field2Desc = "Con un amigo o conocido";
+                    break;
+
+                    case "5":
+                        $field2Desc = "Reparación de daños y perjuicios causados por el estado";
+                    break;
+
+                    case "6":
+                        $field2Desc = "Tu familia";
+                    break;
+
+                    case "7":
+                        $field2Desc = "Tu jefe o empresa";
+                    break;
+
+                    case "8":
+                        $field2Desc = "Vulneración a tu salud";
+                    break;
+
+                    case "9":
+                        $field2Desc = "Vulneración de derechos fundamentales";
+                    break;
+
+                    case "10":
+                        $field2Desc = "Vulneración de derechos por el estado";
+                    break;
+
+                    case "11":
+                        $field2Desc = "Un delito o temas con policía";
+                    break;
+
+                    case "12":
+                        $field2Desc = "Otro";
+                    break;
+
+                }
+
+                //  Field 4 descripción
+
+                $field4Desc = "";
+
+                switch($result->field4){
+                    
+                    case "1":
+                        $field4Desc = "Acoso laboral";
+                    break;
+
+                    case "2":
+                        $field4Desc = "Alimentos a hijos o conyugues";
+                    break;
+
+                    case "3":
+                        $field4Desc = "Capitulaciones";
+                    break;
+
+                    case "4":
+                        $field4Desc = "Con tu EPS";
+                    break;
+
+                    case "5":
+                        $field4Desc = "Contratos";
+                    break;
+
+                    case "6":
+                        $field4Desc = "Declaración de renta";
+                    break;
+
+                    case "7":
+                        $field4Desc = "Deterioro de tu salud a causa de la responsabilidad médica";
+                    break;
+
+                    case "8":
+                        $field4Desc = "Despido sin justa causa";
+                    break;
+
+                    case "9":
+                        $field4Desc = "Dineros adeudados";
+                    break;
+
+                    case "10":
+                        $field4Desc = "Divorcios";
+                    break;
+
+                    case "11":
+                        $field4Desc = "Emancipación";
+                    break;
+
+                    case "12":
+                        $field4Desc = "Herencias";
+                    break;
+
+                    case "13":
+                        $field4Desc = "Inpugnación de paternidad";
+                    break;
+
+                    case "14":
+                        $field4Desc = "Matrimonio";
+                    break;
+
+                    case "15":
+                        $field4Desc = "Omisión médica";
+                    break;
+
+                    case "16":
+                        $field4Desc = "Prestaciones sociales (Prima, vacaciones, cesantías, etc)";
+                    break;
+
+                    case "17":
+                        $field4Desc = "Problemas de deudas impuestos";
+                    break;
+
+                    case "18":
+                        $field4Desc = "Saldos y/o pagos adeudados por el empleador";
+                    break;
+
+                    case "19":
+                        $field4Desc = "Seguridad social (Salud, Pensión ARL)";
+                    break;
+
+                    case "20":
+                        $field4Desc = "Tus bienes";
+                    break;
+
+                    case "21":
+                        $field4Desc = "Violencia intrafamiliar";
+                    break;
+
+                    case "22":
+                        $field4Desc = "Otro";
+                    break;
+
+                }
+
+                //  Field 6 descripción
+
+                $field6Desc = "";
+
+                if(!$field6Desc)
+                    $field6Desc= "Sin descripción";
+
+                //  Field 7 descripción
+
+                $field7Desc = "";
+
+                switch($result->field7){
+                    
+                    case "1":
+                        $field7Desc = "Si";
+                    break;
+
+                    case "2":
+                        $field7Desc = "No";
+                    break;
+
+                }
+
+                //  Construir array caso
+
+                $caso['id'] = $result->id;
+                $caso['created_at'] = $result->created_at;
+                $caso['updated_at'] = $result->updated_at;
+                $caso['active'] = $result->active;
+                $caso['email'] = $result->email;
+                $caso['field1'] = $result->field1;
+                $caso['field1Desc'] = $field1Desc;
+                $caso['field2'] = $result->field2;
+                $caso['field2Desc'] = $field2Desc;
+                $caso['field3'] = $result->field3;
+                $caso['field4'] = $result->field4;
+                $caso['field4Desc'] = $field4Desc;
+                $caso['field5'] = $result->field5;
+                $caso['field6'] = $field6Desc;
+                $caso['field7'] = $result->field7;
+                $caso['field7Desc'] = $field7Desc;
+                $caso['abogado'] = $result->abogado;
+
+                array_push($casos,$caso);
+
+            }
+
+            return response()->json($casos);
+
+        }catch (Exception $e) {}
+
+    }
+
+}
