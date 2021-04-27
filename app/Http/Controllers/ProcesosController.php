@@ -3,6 +3,7 @@
 //  Crear un proceso: createProceso
 //  Obtener procesos: getProceso
 //  Actualizar proceso: procesosUpdate
+//  Solicitar consulta: solicitarConsulta
 
 namespace App\Http\Controllers;
 
@@ -255,6 +256,143 @@ class ProcesosController extends Controller
                     '1',
                     '$email',
                     'El cliente aceptó continuar con el caso, por favor agendar nueva reunión con el cliente'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
+
+    }
+
+    /************************************************************************** */
+
+    /**
+     * Solicitar consulta
+     */
+
+    public function solicitarConsulta(Request $request){
+
+        //  Variables iniciales
+
+        $idCaso = $request->idCaso;
+        $emailCliente = $request->emailCliente;
+        $emailAbogado = $request->emailAbogado;
+
+        //  Validar si ya existe una solicitud
+
+        $new = 0;
+
+        $sqlString = "
+            SELECT 
+                * 
+            FROM 
+                procesos 
+            WHERE 
+                id_caso = '$idCaso' AND  
+                email_cliente= '$emailCliente' AND
+                email_abogado= '$emailAbogado'
+        ";
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $new = 1;
+
+        //  Registrar proceso si es nuevo
+
+        if($new == 0){
+
+            $sqlString = "
+                INSERT INTO procesos VALUES (
+                    '0',
+                    now(),
+                    now(),
+                    '1',
+                    '".$idCaso."',
+                    '".$emailCliente."',
+                    '".$emailAbogado."',
+                    '0'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            //  Registrar Notificación
+
+            $sqlString = "
+                INSERT INTO notificaciones VALUES (
+                    '0',
+                    now(),
+                    now(),
+                    '1',
+                    '".$emailCliente."',
+                    'Se ha solicitado una consulta con el abogado ".$emailAbogado." para el caso #".$idCaso."',
+                    'Solicitud de consulta para un caso'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            //  Registrar Notificación
+
+            $sqlString = "
+                INSERT INTO notificaciones VALUES (
+                    '0',
+                    now(),
+                    now(),
+                    '1',
+                    '".$emailAbogado."',
+                    'Se ha solicitado una consulta con el cliente ".$emailCliente." para el caso #".$idCaso."',
+                    'Solicitud de consulta para un caso'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
+
+        //  Actualizar procesos si ya existe
+
+        if($new == 1){
+
+            $sqlString = "
+                UPDATE 
+                    procesos 
+                SET 
+                    status = '1'
+                WHERE
+                    id_caso = '".$idCaso."'
+            ";
+
+            DB::update($sqlString);
+
+            //  Registrar Notificación
+
+            $sqlString = "
+                INSERT INTO notificaciones VALUES (
+                    '0',
+                    now(),
+                    now(),
+                    '1',
+                    '".$emailCliente."',
+                    'El abogado ".$emailAbogado." acepto la consulta para el caso #".$idCaso."',
+                    'Aprobación de consulta para un caso'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            //  Registrar Notificación
+
+            $sqlString = "
+                INSERT INTO notificaciones VALUES (
+                    '0',
+                    now(),
+                    now(),
+                    '1',
+                    '".$emailAbogado."',
+                    'El cliente ".$emailCliente." acepto la consulta para el caso #".$idCaso."',
+                    'Aprobación de consulta para un caso'
                 )
             ";
 

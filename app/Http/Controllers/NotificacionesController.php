@@ -3,6 +3,7 @@
 //  Crear una notificación: createNotificacion
 //  Consultar notificaciones: getNotificacion
 //  Eliminar notificacion: deleteNotificacion
+//  Marcar como leído una notificación: notificacionLeido
 
 namespace App\Http\Controllers;
 
@@ -127,10 +128,31 @@ class NotificacionesController extends Controller
     public function getNotificacion(Request $request){
 
         //  Variables iniciales
+
         $email = $request->email;
+        $tipo = $request->tipo;
+        $where = "";
+
+        //  Validar parametros
+
+        if($tipo == "1")
+            $where = " AND active = '1' ";
+        
+        if($tipo == "2")
+            $where = " AND active IN ('1','2')";
 
         //  Consultar notificaciones del usuario
-        $sql = DB::select("SELECT * FROM notificaciones WHERE email = '".$email."' AND active != '3'");
+
+        $sqlString = "
+            SELECT 
+                * 
+            FROM 
+                notificaciones 
+            WHERE 
+                email = '".$email."' $where
+            ORDER BY updated_at";
+
+        $sql = DB::select($sqlString);
 
         return response()->json($sql);
 
@@ -149,6 +171,22 @@ class NotificacionesController extends Controller
 
         //  Consultar notificaciones del usuario
         DB::update("UPDATE notificaciones SET active = '3', updated_at = now() WHERE id = '".$id."'");
+
+    }
+
+    /************************************************************************** */
+
+    /**
+     * Marcar como leído una notificación
+     */
+
+    public function notificacionLeido(Request $request){
+
+        //  Variables iniciales
+        $id = $request->id;
+
+        //  Marcar como leído
+        DB::update("UPDATE notificaciones SET active = '2', updated_at = now() WHERE id = '".$id."'");
 
     }
 

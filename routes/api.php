@@ -32,25 +32,43 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => ['cors']], function () {
 
-  Route::apiResource("usuarios","UsuariosController");
-  Route::apiResource("abogados","AbogadosController");
-  Route::apiResource("clientes","ClientesController");
-  Route::match(['post', 'options'], "getDataAbogados", "AbogadosController@getDataAbogados");
-  Route::match(['post', 'options'], "getDataClientes", "ClientesController@getDataClientes");
-  Route::match(['post', 'options'], "getDataCaso", "CasosController@getDataCaso");
-  Route::match(['post', 'options'], "getProceso", "ProcesosController@getProceso");
-  Route::match(['post', 'options'], "getNotificacion", "NotificacionesController@getNotificacion");
-  Route::match(['post', 'options'], "abogadosUpdate", "AbogadosController@abogadosUpdate");
-  Route::match(['post', 'options'], "clientesUpdate", "ClientesController@clientesUpdate");
-  Route::match(['post', 'options'], "casosUpdate", "CasosController@casosUpdate");
-  Route::match(['post', 'options'], "procesosUpdate", "ProcesosController@procesosUpdate");
-  Route::match(['post', 'options'], "createProceso", "ProcesosController@createProceso");
-  Route::match(['post', 'options'], "createNotificacion", "NotificacionesController@createNotificacion");
-  Route::match(['post', 'options'], "deleteNotificacion", "NotificacionesController@deleteNotificacion");
-
   //  UsuariosController
   
+  Route::apiResource("usuarios","UsuariosController");
   Route::match(['post', 'options'], "createUser", "UsuariosController@createUser");
   Route::match(['post', 'options'], "getUser", "UsuariosController@getUser");
 
+  //  AbogadosController
+
+  Route::apiResource("abogados","AbogadosController");
+  Route::match(['post', 'options'], "abogadosUpdate", "AbogadosController@abogadosUpdate");
+  Route::match(['post', 'options'], "getDataAbogados", "AbogadosController@getDataAbogados");
+  Route::match(['post', 'options'], "getAbogados", "AbogadosController@getAbogados");
+
+  //  ProcesosController
+
+  Route::match(['post', 'options'], "solicitarConsulta", "ProcesosController@solicitarConsulta");
+  Route::match(['post', 'options'], "getProceso", "ProcesosController@getProceso");
+  Route::match(['post', 'options'], "procesosUpdate", "ProcesosController@procesosUpdate");
+  Route::match(['post', 'options'], "createProceso", "ProcesosController@createProceso");
+
+  //  CasosController
+
+  Route::match(['post', 'options'], "getDataCaso", "CasosController@getDataCaso");
+  Route::match(['post', 'options'], "getCasos", "CasosController@getCasos");
+  Route::match(['post', 'options'], "casosUpdate", "CasosController@casosUpdate");
+
+  //  NotificacionesController
+  
+  Route::match(['post', 'options'], "getNotificacion", "NotificacionesController@getNotificacion");
+  Route::match(['post', 'options'], "notificacionLeido", "NotificacionesController@notificacionLeido");
+  Route::match(['post', 'options'], "createNotificacion", "NotificacionesController@createNotificacion");
+  Route::match(['post', 'options'], "deleteNotificacion", "NotificacionesController@deleteNotificacion");
+
+  //  ClientesController
+
+  Route::apiResource("clientes","ClientesController");
+  Route::match(['post', 'options'], "getDataClientes", "ClientesController@getDataClientes");
+  Route::match(['post', 'options'], "clientesUpdate", "ClientesController@clientesUpdate");
+  
 });

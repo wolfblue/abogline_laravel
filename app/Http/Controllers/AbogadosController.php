@@ -1,5 +1,7 @@
 <?php
 
+//  Obtener todos los abogados: getAbogados
+
 namespace App\Http\Controllers;
 
 use App\abogados;
@@ -73,6 +75,44 @@ class AbogadosController extends Controller
     {
         //
     }
+
+    /*********************************************************************************** */
+
+    /**
+     * Obtener todos los abogados
+     */
+
+     public function getAbogados(Request $request){
+
+        //  Variables iniciales
+        $idCaso = $request->idCaso;
+
+        //  Consultar abogados que no se halla enviado solicitud
+
+        $sqlString = "
+            SELECT 
+                * 
+            FROM 
+                abogados 
+            WHERE 
+                email NOT IN (
+                    SELECT
+                        email_abogado
+                    FROM
+                        procesos
+                    WHERE
+                        id_caso = '".$idCaso."'
+                ) AND
+            active = '1'
+        ";
+        
+        $sql = DB::select($sqlString);
+
+        return response()->json($sql);
+
+     } 
+
+    /*********************************************************************************** */
 
     /**
      * Actualizar información del abogado

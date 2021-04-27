@@ -150,7 +150,21 @@ class UsuariosController extends Controller
             )
         ";
 
-        //echo $sqlString;
+        DB::insert($sqlString);
+
+        //  Registrar Notificación
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                now(),
+                now(),
+                '1',
+                '".$email."',
+                'Se ha registrado correctamente, bienvenido a Abogline',
+                'Autenticación'
+            )
+        ";
 
         DB::insert($sqlString);
 
