@@ -238,7 +238,15 @@ class CasosController extends Controller
                 SELECT 
                     a.*,
                     case when b.status = '0' then '' else b.email_abogado end as abogado,
-                    case when b.id_caso is null then 'N' else 'S' end as hasProceso
+                    case when b.id_caso is null then 'N' else 'S' end as hasProceso,
+                    (
+                        SELECT
+                            fullname
+                        FROM
+                            abogados
+                        WHERE
+                            email = b.email_abogado
+                    ) AS abogado_fullname
                 FROM 
                     casos a LEFT JOIN procesos b ON a.id = b.id_caso
                 WHERE 
@@ -325,95 +333,212 @@ class CasosController extends Controller
 
                 $field4Desc = "";
 
-                switch($result->field4){
+                $field4Data = explode(",",$result->field4);
+
+                for($i = 0; $i < count($field4Data); $i++){
+
+                    switch($field4Data[$i]){
                     
-                    case "1":
-                        $field4Desc = "Acoso laboral";
-                    break;
+                        case "1":
 
-                    case "2":
-                        $field4Desc = "Alimentos a hijos o conyugues";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Acoso laboral";
+                            else
+                                $field4Desc .= ", Acoso laboral";
 
-                    case "3":
-                        $field4Desc = "Capitulaciones";
-                    break;
+                        break;
+    
+                        case "2":
 
-                    case "4":
-                        $field4Desc = "Con tu EPS";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Alimentos a hijos o conyugues";
+                            else
+                                $field4Desc .= ", Alimentos a hijos o conyugues";
 
-                    case "5":
-                        $field4Desc = "Contratos";
-                    break;
+                        break;
+    
+                        case "3":
 
-                    case "6":
-                        $field4Desc = "Declaración de renta";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Capitulaciones";
+                            else
+                                $field4Desc .= ", Capitulaciones";
 
-                    case "7":
-                        $field4Desc = "Deterioro de tu salud a causa de la responsabilidad médica";
-                    break;
+                        break;
+    
+                        case "4":
 
-                    case "8":
-                        $field4Desc = "Despido sin justa causa";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Con tu EPS";
+                            else
+                                $field4Desc .= ", Con tu EPS";
 
-                    case "9":
-                        $field4Desc = "Dineros adeudados";
-                    break;
+                        break;
+    
+                        case "5":
 
-                    case "10":
-                        $field4Desc = "Divorcios";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Contratos";
+                            else
+                                $field4Desc .= ", Contratos";
+                            
+                        break;
+    
+                        case "6":
 
-                    case "11":
-                        $field4Desc = "Emancipación";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Declaración de renta";
+                            else
+                                $field4Desc .= ", Declaración de renta";
 
-                    case "12":
-                        $field4Desc = "Herencias";
-                    break;
+                        break;
+    
+                        case "7":
 
-                    case "13":
-                        $field4Desc = "Inpugnación de paternidad";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Deterioro de tu salud a causa de la responsabilidad médica";
+                            else
+                                $field4Desc .= ", Deterioro de tu salud a causa de la responsabilidad médica";
 
-                    case "14":
-                        $field4Desc = "Matrimonio";
-                    break;
+                        break;
+    
+                        case "8":
 
-                    case "15":
-                        $field4Desc = "Omisión médica";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Despido sin justa causa";
+                            else
+                                $field4Desc .= ", Despido sin justa causa";
 
-                    case "16":
-                        $field4Desc = "Prestaciones sociales (Prima, vacaciones, cesantías, etc)";
-                    break;
+                        break;
+    
+                        case "9":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Dineros adeudados";
+                            else
+                                $field4Desc .= ", Dineros adeudados";
 
-                    case "17":
-                        $field4Desc = "Problemas de deudas impuestos";
-                    break;
+                        break;
+    
+                        case "10":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Divorcios";
+                            else
+                                $field4Desc .= ", Divorcios";
 
-                    case "18":
-                        $field4Desc = "Saldos y/o pagos adeudados por el empleador";
-                    break;
+                        break;
+    
+                        case "11":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Emancipación";
+                            else
+                                $field4Desc .= ", Emancipación";
 
-                    case "19":
-                        $field4Desc = "Seguridad social (Salud, Pensión ARL)";
-                    break;
+                        break;
+    
+                        case "12":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Herencias";
+                            else
+                                $field4Desc .= ", Herencias";
 
-                    case "20":
-                        $field4Desc = "Tus bienes";
-                    break;
+                        break;
+    
+                        case "13":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Inpugnación de paternidad";
+                            else
+                                $field4Desc .= ", Inpugnación de paternidad";
 
-                    case "21":
-                        $field4Desc = "Violencia intrafamiliar";
-                    break;
+                        break;
+    
+                        case "14":
 
-                    case "22":
-                        $field4Desc = "Otro";
-                    break;
+                            if(!$field4Desc)
+                                $field4Desc = "Matrimonio";
+                            else
+                                $field4Desc .= ", Matrimonio";
+
+                        break;
+    
+                        case "15":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Omisión médica";
+                            else
+                                $field4Desc .= ", Omisión médica";
+
+                        break;
+    
+                        case "16":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Prestaciones sociales (Prima, vacaciones, cesantías, etc)";
+                            else
+                                $field4Desc .= ", Prestaciones sociales (Prima, vacaciones, cesantías, etc)";
+
+                        break;
+    
+                        case "17":
+
+                            if(!$field4Desc)
+                                $field4Desc = "Problemas de deudas impuestos";
+                            else
+                                $field4Desc .= ", Problemas de deudas impuestos";
+
+                        break;
+    
+                        case "18":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Saldos y/o pagos adeudados por el empleador";
+                            else
+                                $field4Desc .= ", Saldos y/o pagos adeudados por el empleador";
+
+                        break;
+    
+                        case "19":
+                            $field4Desc = "Seguridad social (Salud, Pensión ARL)";
+
+                            if(!$field4Desc)
+                                $field4Desc = "Seguridad social (Salud, Pensión ARL)";
+                            else
+                                $field4Desc .= ", Seguridad social (Salud, Pensión ARL)";
+
+                        break;
+    
+                        case "20":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Tus bienes";
+                            else
+                                $field4Desc .= ", Tus bienes";
+
+                        break;
+    
+                        case "21":
+
+                            if(!$field4Desc)
+                                $field4Desc = "Violencia intrafamiliar";
+                            else
+                                $field4Desc .= ", Violencia intrafamiliar";
+
+                        break;
+    
+                        case "22":
+                            
+                            if(!$field4Desc)
+                                $field4Desc = "Otro";
+                            else
+                                $field4Desc .= ", Otro";
+
+                        break;
+    
+                    }
 
                 }
 
@@ -453,6 +578,7 @@ class CasosController extends Controller
                 $caso['field7Desc'] = $field7Desc;
                 $caso['abogado'] = $result->abogado;
                 $caso['hasProceso'] = $result->hasProceso;
+                $caso['abogado_fullname'] = $result->abogado_fullname;
 
                 array_push($casos,$caso);
 

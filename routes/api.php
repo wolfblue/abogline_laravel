@@ -44,6 +44,7 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "abogadosUpdate", "AbogadosController@abogadosUpdate");
   Route::match(['post', 'options'], "getDataAbogados", "AbogadosController@getDataAbogados");
   Route::match(['post', 'options'], "getAbogados", "AbogadosController@getAbogados");
+  Route::match(['post', 'options'], "getAbogadoCasosProceso", "AbogadosController@getAbogadoCasosProceso");
 
   //  ProcesosController
 
@@ -70,5 +71,8 @@ Route::group(['middleware' => ['cors']], function () {
   Route::apiResource("clientes","ClientesController");
   Route::match(['post', 'options'], "getDataClientes", "ClientesController@getDataClientes");
   Route::match(['post', 'options'], "clientesUpdate", "ClientesController@clientesUpdate");
+
+  //  CalendarioController
+  Route::match(['post', 'options'], "agendarReunion", "CalendarioController@agendarReunion");
   
 });

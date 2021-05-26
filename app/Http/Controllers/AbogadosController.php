@@ -140,12 +140,22 @@ class AbogadosController extends Controller
             $price = $request->price;
             $cv = $request->cv;
             $format = $request->format;
+            $photo = $request->photo;
+            $formatPhoto = $request->formatPhoto;
 
             //  Guardar archivo en físico
 
-            file_put_contents("cv/".$identification.".".$format, file_get_contents($cv));
+            if($cv)
+                file_put_contents("cv/".$identification.".".$format, file_get_contents($cv));
 
             $cv = "cv/".$identification.".".$format;
+
+            //  Guardar foto en físico
+
+            if($photo)
+                file_put_contents("cv/".$identification.".".$formatPhoto, file_get_contents($photo));
+
+            $photo = "cv/".$identification.".".$formatPhoto;
 
             //  Validar si es nuevo registro o actualización
 
@@ -181,7 +191,8 @@ class AbogadosController extends Controller
                         '".$pleasures."',
                         '".$pleasures_other."',
                         '".$price."',
-                        '".$cv."'
+                        '".$cv."',
+                        '".$photo."'
                     )
                 ";
 
@@ -207,7 +218,8 @@ class AbogadosController extends Controller
                         pleasures = '".$pleasures."',
                         pleasures_other = '".$pleasures_other."',
                         price = '".$price."',
-                        cv = '".$cv."'
+                        cv = '".$cv."',
+                        photo = '".$photo."'
                     WHERE
                         email = '".$email."'
                 ";
@@ -339,12 +351,265 @@ class AbogadosController extends Controller
                 $abogado['pleasures_other'] = $result->pleasures_other;
                 $abogado['price'] = $result->price;
                 $abogado['cv'] = $result->cv;
+                $abogado['photo'] = $result->photo;
 
                 array_push($abogados,$abogado);
 
             }
 
             return response()->json($abogados);
+
+        }catch (Exception $e) {}
+
+    }
+
+    /************************************************************************************** */
+
+    /**
+     * Consultar los casos en proceso de un abogado
+     */
+
+    public function getAbogadoCasosProceso(Request $request){
+
+        //  Variables iniciales
+
+        $emailAbogado = $request->emailAbogado;
+        $casos = [];
+
+        try{
+
+            //  Consultar casos
+
+            $sqlString = "
+                SELECT 
+                    *
+                FROM 
+                    casos
+                WHERE 
+                    active = '1' AND
+                    id IN (
+                        SELECT
+                            id_caso
+                        FROM
+                            procesos
+                        WHERE
+                            email_abogado = '".$emailAbogado."' AND
+                            status != 0
+                    )
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result){
+
+                //  Field 1 descripción
+
+                $field1Desc = "";
+
+                switch($result->field1){
+                    
+                    case "1":
+                        $field1Desc = "El estado (Toda entidad pública u organismo adscrito a los gobiernos nacionales regionales y/o locales)";
+                    break;
+
+                    case "2":
+                        $field1Desc = "Un particular o empresa privada (Tu jefe, un amigo, tu familia, conocidos, tu jefe y empresas que son privadas)";
+                    break;
+
+                }
+
+                //  Field 2 descripción
+
+                $field2Desc = "";
+
+                switch($result->field2){
+                    
+                    case "1":
+                        $field2Desc = "Con tu empleo en una entidad pública";
+                    break;
+
+                    case "2":
+                        $field2Desc = "Con tus impuestos";
+                    break;
+
+                    case "3":
+                        $field2Desc = "Con tu negocio";
+                    break;
+
+                    case "4":
+                        $field2Desc = "Con un amigo o conocido";
+                    break;
+
+                    case "5":
+                        $field2Desc = "Reparación de daños y perjuicios causados por el estado";
+                    break;
+
+                    case "6":
+                        $field2Desc = "Tu familia";
+                    break;
+
+                    case "7":
+                        $field2Desc = "Tu jefe o empresa";
+                    break;
+
+                    case "8":
+                        $field2Desc = "Vulneración a tu salud";
+                    break;
+
+                    case "9":
+                        $field2Desc = "Vulneración de derechos fundamentales";
+                    break;
+
+                    case "10":
+                        $field2Desc = "Vulneración de derechos por el estado";
+                    break;
+
+                    case "11":
+                        $field2Desc = "Un delito o temas con policía";
+                    break;
+
+                    case "12":
+                        $field2Desc = "Otro";
+                    break;
+
+                }
+
+                //  Field 4 descripción
+
+                $field4Desc = "";
+
+                switch($result->field4){
+                    
+                    case "1":
+                        $field4Desc = "Acoso laboral";
+                    break;
+
+                    case "2":
+                        $field4Desc = "Alimentos a hijos o conyugues";
+                    break;
+
+                    case "3":
+                        $field4Desc = "Capitulaciones";
+                    break;
+
+                    case "4":
+                        $field4Desc = "Con tu EPS";
+                    break;
+
+                    case "5":
+                        $field4Desc = "Contratos";
+                    break;
+
+                    case "6":
+                        $field4Desc = "Declaración de renta";
+                    break;
+
+                    case "7":
+                        $field4Desc = "Deterioro de tu salud a causa de la responsabilidad médica";
+                    break;
+
+                    case "8":
+                        $field4Desc = "Despido sin justa causa";
+                    break;
+
+                    case "9":
+                        $field4Desc = "Dineros adeudados";
+                    break;
+
+                    case "10":
+                        $field4Desc = "Divorcios";
+                    break;
+
+                    case "11":
+                        $field4Desc = "Emancipación";
+                    break;
+
+                    case "12":
+                        $field4Desc = "Herencias";
+                    break;
+
+                    case "13":
+                        $field4Desc = "Inpugnación de paternidad";
+                    break;
+
+                    case "14":
+                        $field4Desc = "Matrimonio";
+                    break;
+
+                    case "15":
+                        $field4Desc = "Omisión médica";
+                    break;
+
+                    case "16":
+                        $field4Desc = "Prestaciones sociales (Prima, vacaciones, cesantías, etc)";
+                    break;
+
+                    case "17":
+                        $field4Desc = "Problemas de deudas impuestos";
+                    break;
+
+                    case "18":
+                        $field4Desc = "Saldos y/o pagos adeudados por el empleador";
+                    break;
+
+                    case "19":
+                        $field4Desc = "Seguridad social (Salud, Pensión ARL)";
+                    break;
+
+                    case "20":
+                        $field4Desc = "Tus bienes";
+                    break;
+
+                    case "21":
+                        $field4Desc = "Violencia intrafamiliar";
+                    break;
+
+                    case "22":
+                        $field4Desc = "Otro";
+                    break;
+
+                }
+
+                //  Field 7 descripción
+
+                $field7Desc = "";
+
+                switch($result->field7){
+                    
+                    case "1":
+                        $field7Desc = "Si";
+                    break;
+
+                    case "2":
+                        $field7Desc = "No";
+                    break;
+
+                }
+
+                //  Construir array caso
+
+                $caso['id'] = $result->id;
+                $caso['created_at'] = $result->created_at;
+                $caso['updated_at'] = $result->updated_at;
+                $caso['active'] = $result->active;
+                $caso['email'] = $result->email;
+                $caso['field1'] = $result->field1;
+                $caso['field1Desc'] = $field1Desc;
+                $caso['field2'] = $result->field2;
+                $caso['field2Desc'] = $field2Desc;
+                $caso['field3'] = $result->field3;
+                $caso['field4'] = $result->field4;
+                $caso['field4Desc'] = $field4Desc;
+                $caso['field5'] = $result->field5;
+                $caso['field6'] = $result->field6;
+                $caso['field7'] = $result->field7;
+                $caso['field7Desc'] = $field7Desc;
+
+                array_push($casos,$caso);
+
+            }
+
+            return response()->json($casos);
 
         }catch (Exception $e) {}
 
