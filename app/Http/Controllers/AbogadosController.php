@@ -101,7 +101,8 @@ class AbogadosController extends Controller
                     FROM
                         procesos
                     WHERE
-                        id_caso = '".$idCaso."'
+                        id_caso = '".$idCaso."' AND
+                        status != '0'
                 ) AND
             active = '1'
         ";

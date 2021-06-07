@@ -58,6 +58,7 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "getDataCaso", "CasosController@getDataCaso");
   Route::match(['post', 'options'], "getCasos", "CasosController@getCasos");
   Route::match(['post', 'options'], "casosUpdate", "CasosController@casosUpdate");
+  Route::match(['post', 'options'], "getDataCasoEspecifico", "CasosController@getDataCasoEspecifico");
 
   //  NotificacionesController
   

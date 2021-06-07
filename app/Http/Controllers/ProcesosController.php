@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 use App\procesos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ApiNotificaciones;
 
 class ProcesosController extends Controller
 {
@@ -97,10 +98,13 @@ class ProcesosController extends Controller
 
     public function createProceso(Request $request){
 
-        //  Variables iniciales
+        //  Parametros de entrada
 
         $email = $request->email;
         $idCaso = $request->idCaso;
+
+        //  Variables iniciales
+        $apiNotificaciones = new NotificacionesController();
 
         //  Consultar siguiente consecutivo
 
@@ -155,35 +159,29 @@ class ProcesosController extends Controller
         foreach($sql as $result)
             $emailCliente = $result->email;
 
-        //  Registrar notificación al abogado
+        //  Notificar al abogado
 
-        $sqlString = "
-            INSERT INTO notificaciones VALUES (
-                '0',
-                now(),
-                now(),
-                '1',
-                '$email',
-                'Aplicó a un nuevo caso, el número del caso es $idCaso, notificaremos al cliente para una pronta respuesta'
-            )
-        ";
-        
-        DB::insert($sqlString);
+        $mensaje = "Aplicó a un nuevo caso, el número del caso es ".$idCaso.", notificaremos al cliente para una pronta respuesta";
+        $tipo = "Aplicar a un caso";
 
-        //  Registrar notificación al cliente
+        $apiNotificaciones->createNotificacionFunction(
+            $email,
+            $mensaje,
+            $tipo,
+            $idCaso
+        );
 
-        $sqlString = "
-            INSERT INTO notificaciones VALUES (
-                '0',
-                now(),
-                now(),
-                '1',
-                '$emailCliente',
-                'Un abogado esta interesado de continuar con el caso número $idCaso'
-            )
-        ";
-        
-        DB::insert($sqlString);
+        //  Notificar al cliente
+
+        $mensaje = "Un abogado esta interesado de continuar con el caso número".$idCaso;
+        $tipo = "Abogado en espera de aceptación";
+
+        $apiNotificaciones->createNotificacionFunction(
+            $emailCliente,
+            $mensaje,
+            $tipo,
+            $idCaso
+        );
 
     }
 
@@ -225,11 +223,14 @@ class ProcesosController extends Controller
 
     public function procesosUpdate(Request $request){
 
-        //  Variables iniciales
+        //  Parametros de entrada
 
         $email = $request->email;
         $idCaso = $request->idCaso;
         $active = $request->active;
+
+        //  Variables iniciales
+        $apiNotificaciones = new NotificacionesController();
 
         $sqlString = "
             UPDATE
@@ -248,18 +249,17 @@ class ProcesosController extends Controller
 
         if($active == 3){
 
-            $sqlString = "
-                INSERT INTO notificaciones VALUES (
-                    '0',
-                    now(),
-                    now(),
-                    '1',
-                    '$email',
-                    'El cliente aceptó continuar con el caso, por favor agendar nueva reunión con el cliente'
-                )
-            ";
+            //  Notificar al abogado
 
-            DB::insert($sqlString);
+            $mensaje = "El cliente aceptó continuar con el caso, por favor agendar nueva reunión con el cliente";
+            $tipo = "Caso aceptado";
+
+            $apiNotificaciones->createNotificacionFunction(
+                $email,
+                $mensaje,
+                $tipo,
+                $idCaso
+            );
 
         }
 
@@ -273,11 +273,14 @@ class ProcesosController extends Controller
 
     public function solicitarConsulta(Request $request){
 
-        //  Variables iniciales
+        //  Parametros de entrada
 
         $idCaso = $request->idCaso;
         $emailCliente = $request->emailCliente;
         $emailAbogado = $request->emailAbogado;
+
+        //  Variables iniciales
+        $apiNotificaciones = new NotificacionesController();
 
         //  Validar si ya existe una solicitud
 
@@ -317,37 +320,29 @@ class ProcesosController extends Controller
 
             DB::insert($sqlString);
 
-            //  Registrar Notificación
+            //  Notificar al cliente
 
-            $sqlString = "
-                INSERT INTO notificaciones VALUES (
-                    '0',
-                    now(),
-                    now(),
-                    '1',
-                    '".$emailCliente."',
-                    'Se ha solicitado una consulta con el abogado ".$emailAbogado." para el caso #".$idCaso."',
-                    'Solicitud de consulta para un caso'
-                )
-            ";
+            $mensaje = "Se ha solicitado una consulta con el abogado ".$emailAbogado." para el caso #".$idCaso;
+            $tipo = "Solicitud de consulta para un caso";
 
-            DB::insert($sqlString);
+            $apiNotificaciones->createNotificacionFunction(
+                $emailCliente,
+                $mensaje,
+                $tipo,
+                $idCaso
+            );
 
-            //  Registrar Notificación
+            //  Notificar al abogado
 
-            $sqlString = "
-                INSERT INTO notificaciones VALUES (
-                    '0',
-                    now(),
-                    now(),
-                    '1',
-                    '".$emailAbogado."',
-                    'Se ha solicitado una consulta con el cliente ".$emailCliente." para el caso #".$idCaso."',
-                    'Solicitud de consulta para un caso'
-                )
-            ";
+            $mensaje = "Se ha solicitado una consulta con el cliente ".$emailCliente." para el caso #".$idCaso;
+            $tipo = "Solicitud de consulta para un caso";
 
-            DB::insert($sqlString);
+            $apiNotificaciones->createNotificacionFunction(
+                $emailAbogado,
+                $mensaje,
+                $tipo,
+                $idCaso
+            );
 
         }
 
@@ -366,37 +361,29 @@ class ProcesosController extends Controller
 
             DB::update($sqlString);
 
-            //  Registrar Notificación
+            //  Notificar al cliente
 
-            $sqlString = "
-                INSERT INTO notificaciones VALUES (
-                    '0',
-                    now(),
-                    now(),
-                    '1',
-                    '".$emailCliente."',
-                    'El abogado ".$emailAbogado." acepto la consulta para el caso #".$idCaso."',
-                    'Aprobación de consulta para un caso'
-                )
-            ";
+            $mensaje = "El abogado ".$emailAbogado." acepto la consulta para el caso #".$idCaso;
+            $tipo = "Aprobación de consulta para un caso";
 
-            DB::insert($sqlString);
+            $apiNotificaciones->createNotificacionFunction(
+                $emailCliente,
+                $mensaje,
+                $tipo,
+                $idCaso
+            );
 
-            //  Registrar Notificación
+            //  Notificar al abogado
 
-            $sqlString = "
-                INSERT INTO notificaciones VALUES (
-                    '0',
-                    now(),
-                    now(),
-                    '1',
-                    '".$emailAbogado."',
-                    'El cliente ".$emailCliente." acepto la consulta para el caso #".$idCaso."',
-                    'Aprobación de consulta para un caso'
-                )
-            ";
+            $mensaje = "El cliente ".$emailCliente." acepto la consulta para el caso #".$idCaso;
+            $tipo = "Aprobación de consulta para un caso";
 
-            DB::insert($sqlString);
+            $apiNotificaciones->createNotificacionFunction(
+                $emailAbogado,
+                $mensaje,
+                $tipo,
+                $idCaso
+            );
 
         }
 

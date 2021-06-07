@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ApiNotificaciones;
 
 class UsuariosController extends Controller
 {
@@ -109,13 +110,16 @@ class UsuariosController extends Controller
 
     public function createUser(Request $request){
 
-        //  Variables iniciales
+        //  Parametros de entrada
 
         $active = $request->active;
         $user = $request->user;
         $email = $request->email;
         $password = $request->password;
         $profile = $request->profile;
+
+        //  Variables iniciales
+        $apiNotificaciones = new NotificacionesController();
 
         //  Consultar siguiente consecutivo
 
@@ -152,21 +156,18 @@ class UsuariosController extends Controller
 
         DB::insert($sqlString);
 
-        //  Registrar Notificación
+        //  Notificar al usuario
 
-        $sqlString = "
-            INSERT INTO notificaciones VALUES (
-                '0',
-                now(),
-                now(),
-                '1',
-                '".$email."',
-                'Se ha registrado correctamente, bienvenido a Abogline',
-                'Autenticación'
-            )
-        ";
+        $mensaje = "Se ha registrado correctamente, bienvenido a Abogline";
+        $tipo = "Autenticación";
+        $idCaso = "";
 
-        DB::insert($sqlString);
+        $apiNotificaciones->createNotificacionFunction(
+            $email,
+            $mensaje,
+            $tipo,
+            $idCaso
+        );
 
     }
 
