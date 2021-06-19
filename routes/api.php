@@ -52,6 +52,7 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "getProceso", "ProcesosController@getProceso");
   Route::match(['post', 'options'], "procesosUpdate", "ProcesosController@procesosUpdate");
   Route::match(['post', 'options'], "createProceso", "ProcesosController@createProceso");
+  Route::match(['post', 'options'], "rechazarSolicitud", "ProcesosController@rechazarSolicitud");
 
   //  CasosController
 

@@ -89,6 +89,7 @@ class UsuariosController extends Controller
         $user = $request->user;
         $email = $request->email;
         $password = $request->password;
+        $login = $request->login;
 
         //  Validar condiciones
 
@@ -96,7 +97,10 @@ class UsuariosController extends Controller
             $where .= "AND password='".$password."'";
         }
 
-        $sql = DB::select("SELECT * FROM usuarios WHERE ( user = '$email' or email = '".$email."' ) ".$where);
+        if($login)
+            $sql = DB::select("SELECT * FROM usuarios WHERE ( user = '$email' or email = '".$email."' ) ".$where);
+        else
+            $sql = DB::select("SELECT * FROM usuarios WHERE ( user = '$user' or email = '".$email."' ) ".$where);
 
         return response()->json($sql);
 

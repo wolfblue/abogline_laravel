@@ -551,6 +551,7 @@ class CasosController extends Controller
                 $abogado = "";
                 $abogado_fullname = "";
                 $hasProceso = "N";
+                $emailOrigen = "";
 
                 $sqlString2 = "
                     SELECT
@@ -562,7 +563,8 @@ class CasosController extends Controller
                                 abogados
                             WHERE
                                 email = procesos.email_abogado
-                        ) AS abogado_fullname
+                        ) AS abogado_fullname,
+                        email_origen
                     FROM
                         procesos
                     WHERE
@@ -577,6 +579,7 @@ class CasosController extends Controller
                     $abogado = $result2->abogado;
                     $abogado_fullname = $result2->abogado_fullname;
                     $hasProceso = "S";
+                    $emailOrigen = $result2->email_origen;
                     
                 }
 
@@ -601,6 +604,7 @@ class CasosController extends Controller
                 $caso['abogado'] = $abogado;
                 $caso['hasProceso'] = $hasProceso;
                 $caso['abogado_fullname'] = $abogado_fullname;
+                $caso['emailOrigen'] = $emailOrigen;
 
                 array_push($casos,$caso);
 
@@ -867,7 +871,9 @@ class CasosController extends Controller
     public function getDataCasoEspecifico(Request $request){
 
         //  Parametros de entrada
+        
         $idCaso = $request->idCaso;
+        $emailLogin = $request->emailLogin;
 
         //  Variables iniciales
 
@@ -881,7 +887,8 @@ class CasosController extends Controller
             FROM
                 casos
             WHERE
-                active = '1'
+                active = '1' AND
+                id = '".$idCaso."'
         ";
 
         $sql = DB::select($sqlString);
@@ -1194,6 +1201,7 @@ class CasosController extends Controller
             $abogado = "";
             $abogado_fullname = "";
             $hasProceso = "N";
+            $emailOrigen = "";
 
             $sqlString2 = "
                 SELECT
@@ -1205,11 +1213,16 @@ class CasosController extends Controller
                             abogados
                         WHERE
                             email = procesos.email_abogado
-                    ) AS abogado_fullname
+                    ) AS abogado_fullname,
+                    email_origen
                 FROM
                     procesos
                 WHERE
-                    id_caso = '".$result->id."'
+                    id_caso = '".$idCaso."' AND
+                    (
+                        email_cliente = '".$emailLogin."' OR
+                        email_abogado = '".$emailLogin."'
+                    )
                         
             ";
 
@@ -1220,12 +1233,13 @@ class CasosController extends Controller
                 $abogado = $result2->abogado;
                 $abogado_fullname = $result2->abogado_fullname;
                 $hasProceso = "S";
+                $emailOrigen = $result2->email_origen;
                 
             }
 
             //  Construir array caso
 
-            $caso['id'] = $result->id;
+            $caso['id'] = $idCaso;
             $caso['created_at'] = $result->created_at;
             $caso['updated_at'] = $result->updated_at;
             $caso['active'] = $result->active;
@@ -1244,6 +1258,7 @@ class CasosController extends Controller
             $caso['abogado'] = $abogado;
             $caso['hasProceso'] = $hasProceso;
             $caso['abogado_fullname'] = $abogado_fullname;
+            $caso['emailOrigen'] = $emailOrigen;
 
             array_push($casos,$caso);
 

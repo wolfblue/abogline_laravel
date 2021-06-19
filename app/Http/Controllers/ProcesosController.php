@@ -278,6 +278,7 @@ class ProcesosController extends Controller
         $idCaso = $request->idCaso;
         $emailCliente = $request->emailCliente;
         $emailAbogado = $request->emailAbogado;
+        $emailOrigen = $request->emailOrigen;
 
         //  Variables iniciales
         $apiNotificaciones = new NotificacionesController();
@@ -314,7 +315,8 @@ class ProcesosController extends Controller
                     '".$idCaso."',
                     '".$emailCliente."',
                     '".$emailAbogado."',
-                    '0'
+                    '0',
+                    '".$emailOrigen."'
                 )
             ";
 
@@ -322,7 +324,23 @@ class ProcesosController extends Controller
 
             //  Notificar al cliente
 
-            $mensaje = "Se ha solicitado una consulta con el abogado ".$emailAbogado." para el caso #".$idCaso;
+            $abogado = "";
+
+            $sqlString = "
+                SELECT
+                    fullname
+                FROM
+                    abogados
+                WHERE
+                 email = '".$emailAbogado."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $abogado = $result->fullname;
+
+            $mensaje = "Se ha solicitado una consulta con el abogado ".$abogado." para el caso #".$idCaso;
             $tipo = "Solicitud de consulta para un caso";
 
             $apiNotificaciones->createNotificacionFunction(
@@ -334,7 +352,24 @@ class ProcesosController extends Controller
 
             //  Notificar al abogado
 
-            $mensaje = "Se ha solicitado una consulta con el cliente ".$emailCliente." para el caso #".$idCaso;
+            $cliente = "";
+
+            $sqlString = "
+                SELECT
+                    name,
+                    lastname
+                FROM
+                    clientes
+                WHERE
+                    email = '".$emailCliente."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $cliente = $result->name." ".$result->lastname;
+
+            $mensaje = "Se ha solicitado una consulta con el cliente ".$cliente." para el caso #".$idCaso;
             $tipo = "Solicitud de consulta para un caso";
 
             $apiNotificaciones->createNotificacionFunction(
@@ -363,7 +398,23 @@ class ProcesosController extends Controller
 
             //  Notificar al cliente
 
-            $mensaje = "El abogado ".$emailAbogado." acepto la consulta para el caso #".$idCaso;
+            $abogado = "";
+
+            $sqlString = "
+                SELECT
+                    fullname
+                FROM
+                    abogados
+                WHERE
+                    email = '".$emailAbogado."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $abogado = $result->fullname;
+
+            $mensaje = "El abogado ".$abogado." acepto la consulta para el caso #".$idCaso;
             $tipo = "Aprobación de consulta para un caso";
 
             $apiNotificaciones->createNotificacionFunction(
@@ -375,7 +426,24 @@ class ProcesosController extends Controller
 
             //  Notificar al abogado
 
-            $mensaje = "El cliente ".$emailCliente." acepto la consulta para el caso #".$idCaso;
+            $cliente = "";
+
+            $sqlString = "
+                SELECT
+                    name,
+                    lastname
+                FROM
+                    clientes
+                WHERE
+                    email = '".$emailCliente."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $cliente = $result->name." ".$result->lastname;
+
+            $mensaje = "El cliente ".$cliente." acepto la consulta para el caso #".$idCaso;
             $tipo = "Aprobación de consulta para un caso";
 
             $apiNotificaciones->createNotificacionFunction(
@@ -386,6 +454,78 @@ class ProcesosController extends Controller
             );
 
         }
+
+    }
+
+    /***************************************************************************************** */
+    //  RECHAZAR SOLICITUD
+    /***************************************************************************************** */
+
+    public function rechazarSolicitud(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $emailCliente = $request->emailCliente;
+        $emailAbogado = $request->emailAbogado;
+
+        //  Variables iniciales
+        $apiNotificaciones = new NotificacionesController();
+
+        //  Rechazar solicitud
+
+        $sqlString = "
+            UPDATE
+                procesos
+            SET
+                status = '3'
+            WHERE
+                id_caso = '".$idCaso."' AND
+                email_cliente = '".$emailCliente."' AND
+                email_abogado = '".$emailAbogado."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Notificar al cliente
+
+        $abogado = "";
+
+        $sqlString = "
+            SELECT
+                fullname
+            FROM
+                abogados
+            WHERE
+                email = '".$emailAbogado."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->fullname;
+
+        $mensaje = "El abogado ".$abogado." rechazó la solicitud para el caso #".$idCaso;
+        $tipo = "Rechazo de solicitud para un caso";
+
+        $apiNotificaciones->createNotificacionFunction(
+            $emailCliente,
+            $mensaje,
+            $tipo,
+            $idCaso
+        );
+
+        //  Notificar al abogado
+
+        $mensaje = "Se ha rechazado la solicitud para el caso #".$idCaso;
+        $tipo = "Rechazo de solicitud para un caso";
+
+        $apiNotificaciones->createNotificacionFunction(
+            $emailAbogado,
+            $mensaje,
+            $tipo,
+            $idCaso
+        );
 
     }
 

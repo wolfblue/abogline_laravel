@@ -110,18 +110,19 @@ class NotificacionesController extends Controller
         //  Validar parametros
 
         if($tipo == "1")
-            $where = " AND active = '1' ";
+            $where = " AND notificaciones.active = '1' ";
         
         if($tipo == "2")
-            $where = " AND active IN ('1','2')";
+            $where = " AND notificaciones.active IN ('1','2')";
 
         //  Consultar notificaciones del usuario
 
         $sqlString = "
             SELECT 
-                * 
+                notificaciones.*,
+                procesos.status AS estadoProceso
             FROM 
-                notificaciones 
+                notificaciones LEFT JOIN procesos ON notificaciones.id_caso = procesos.id_caso
             WHERE 
                 email = '".$email."' $where
             ORDER BY updated_at";

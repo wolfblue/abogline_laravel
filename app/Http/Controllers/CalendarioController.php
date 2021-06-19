@@ -51,7 +51,24 @@ class CalendarioController extends Controller
 
       //  Notificar al abogado
 
-      $mensaje = "Se ha solicitado reunión con el cliente ".$email_cliente."  para el caso #".$id_caso." el día ".$date_meeting.", pendiente aprobación de la reunión',
+      $cliente = "";
+
+      $sqlString = "
+        SELECT
+          name,
+          lastname
+        FROM
+          clientes
+        WHERE
+          email = '".$email_cliente."'
+      ";
+
+      $sql = DB::select($sqlString);
+
+      foreach($sql as $result)
+        $cliente = $result->name." ".$result->lastname;
+
+      $mensaje = "Se ha solicitado reunión con el cliente ".$cliente."  para el caso #".$id_caso." el día ".$date_meeting.", pendiente aprobación de la reunión',
       'Reunión pendiente de aprobación";
 
       $tipo = "";
@@ -65,7 +82,23 @@ class CalendarioController extends Controller
 
       //  Notificar al cliente
 
-      $mensaje = "Se ha solicitado reunión con el abogado ".$email_abogado."  para el caso #".$id_caso." el día ".$date_meeting.", pendiente aprobación de la reunión',
+      $abogado = "";
+
+      $sqlString = "
+        SELECT
+          fullname
+        FROM
+          abogados
+        WHERE
+          email = '".$email_abogado."'
+      ";
+
+      $sql = DB::select($sqlString);
+
+      foreach($sql as $result)
+        $abogado = $result->fullname;
+
+      $mensaje = "Se ha solicitado reunión con el abogado ".$abogado."  para el caso #".$id_caso." el día ".$date_meeting.", pendiente aprobación de la reunión',
       'Reunión pendiente de aprobación";
 
       $tipo = "";
