@@ -165,7 +165,8 @@ class CasosController extends Controller
                     $email,
                     $mensaje,
                     $tipo,
-                    $idCaso
+                    $idCaso,
+                    '0'
                 );
 
             }else{
@@ -198,7 +199,8 @@ class CasosController extends Controller
                     $email,
                     $mensaje,
                     $tipo,
-                    $idCaso
+                    $idCaso,
+                    '0'
                 );
 
             }
@@ -1265,6 +1267,34 @@ class CasosController extends Controller
         }
 
         return response()->json($casos);
+
+    }
+
+    /***************************************************************************************** */
+    //  OBTENER SI YA UN CASO TIENE MERGE
+    /***************************************************************************************** */
+
+    public function getMergeCaso(Request $request){
+        
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Consultar si un caso tiene merge
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                procesos
+            WHERE
+                id_caso = '".$idCaso."' AND
+                status = '2'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        return response()->json($sql);
 
     }
 

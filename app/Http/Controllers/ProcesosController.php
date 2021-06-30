@@ -168,7 +168,8 @@ class ProcesosController extends Controller
             $email,
             $mensaje,
             $tipo,
-            $idCaso
+            $idCaso,
+            '0'
         );
 
         //  Notificar al cliente
@@ -180,7 +181,8 @@ class ProcesosController extends Controller
             $emailCliente,
             $mensaje,
             $tipo,
-            $idCaso
+            $idCaso,
+            '0'
         );
 
     }
@@ -258,7 +260,8 @@ class ProcesosController extends Controller
                 $email,
                 $mensaje,
                 $tipo,
-                $idCaso
+                $idCaso,
+                '0'
             );
 
         }
@@ -347,7 +350,8 @@ class ProcesosController extends Controller
                 $emailCliente,
                 $mensaje,
                 $tipo,
-                $idCaso
+                $idCaso,
+                '0'
             );
 
             //  Notificar al abogado
@@ -376,7 +380,8 @@ class ProcesosController extends Controller
                 $emailAbogado,
                 $mensaje,
                 $tipo,
-                $idCaso
+                $idCaso,
+                '0'
             );
 
         }
@@ -389,7 +394,7 @@ class ProcesosController extends Controller
                 UPDATE 
                     procesos 
                 SET 
-                    status = '1'
+                    status = '2'
                 WHERE
                     id_caso = '".$idCaso."'
             ";
@@ -414,14 +419,15 @@ class ProcesosController extends Controller
             foreach($sql as $result)
                 $abogado = $result->fullname;
 
-            $mensaje = "El abogado ".$abogado." acepto la consulta para el caso #".$idCaso;
+            $mensaje = "Se aceptó de ambas partes la solicitud para el caso #".$idCaso.", por favor realizar agendamiento para tener contacto";
             $tipo = "Aprobación de consulta para un caso";
 
             $apiNotificaciones->createNotificacionFunction(
                 $emailCliente,
                 $mensaje,
                 $tipo,
-                $idCaso
+                $idCaso,
+                '0'
             );
 
             //  Notificar al abogado
@@ -443,14 +449,15 @@ class ProcesosController extends Controller
             foreach($sql as $result)
                 $cliente = $result->name." ".$result->lastname;
 
-            $mensaje = "El cliente ".$cliente." acepto la consulta para el caso #".$idCaso;
+            $mensaje = "Se aceptó de ambas partes la solicitud para el caso #".$idCaso.", por favor realizar agendamiento para tener contacto";
             $tipo = "Aprobación de consulta para un caso";
 
             $apiNotificaciones->createNotificacionFunction(
                 $emailAbogado,
                 $mensaje,
                 $tipo,
-                $idCaso
+                $idCaso,
+                '0'
             );
 
         }
@@ -512,7 +519,8 @@ class ProcesosController extends Controller
             $emailCliente,
             $mensaje,
             $tipo,
-            $idCaso
+            $idCaso,
+            '0'
         );
 
         //  Notificar al abogado
@@ -524,8 +532,38 @@ class ProcesosController extends Controller
             $emailAbogado,
             $mensaje,
             $tipo,
-            $idCaso
+            $idCaso,
+            '0'
         );
+
+    }
+
+    /***************************************************************************************** */
+    //  CONSULTAR SI YA SE INICIO UN PROCESO CON UN ABOGADO
+    /***************************************************************************************** */
+
+    public function getProcesoAbogado(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $emailAbogado = $request->emailAbogado;
+
+        //  Consultar si ya se inicio un proceso
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                procesos
+            WHERE
+                email_abogado = '".$emailAbogado."' AND
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        return response()->json($sql);
 
     }
 

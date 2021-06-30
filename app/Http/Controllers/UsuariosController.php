@@ -170,7 +170,8 @@ class UsuariosController extends Controller
             $email,
             $mensaje,
             $tipo,
-            $idCaso
+            $idCaso,
+            '0'
         );
 
     }

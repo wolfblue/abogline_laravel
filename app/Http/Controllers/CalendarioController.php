@@ -26,9 +26,10 @@ class CalendarioController extends Controller
       $email_abogado = $request->email_abogado;
       $date_meeting = $request->date_meeting;
       $id_caso = $request->id_caso;
+      $email_aprobacion = $request->email_aprobacion;
 
       //  Variables iniciales
-      $apiNotificaciones = new NotificacionesController();
+      $apiNotificaciones = new NotificacionesController(); 
 
       //  Insertar agendamiento
 
@@ -40,14 +41,31 @@ class CalendarioController extends Controller
           '1',
           '".$email_cliente."',
           '".$email_abogado."',
-          '0',
+          '1',
           '".$date_meeting."',
           '',
-          '".$id_caso."'
+          '".$id_caso."',
+          '".$email_aprobacion."'
         )
       ";
 
       DB::insert($sqlString);
+
+      //  Consultar id de la reunion
+
+      $idReunion = '0';
+
+      $sqlString = "
+        SELECT
+          MAX(id) AS id
+        FROM
+          calendario
+      ";
+
+      $sql = DB::select($sqlString);
+
+      foreach($sql as $result)
+        $idReunion = $result->id;
 
       //  Notificar al abogado
 
@@ -68,16 +86,16 @@ class CalendarioController extends Controller
       foreach($sql as $result)
         $cliente = $result->name." ".$result->lastname;
 
-      $mensaje = "Se ha solicitado reunión con el cliente ".$cliente."  para el caso #".$id_caso." el día ".$date_meeting.", pendiente aprobación de la reunión',
-      'Reunión pendiente de aprobación";
+      $mensaje = "Se ha solicitado reunion con el cliente ".$cliente."  para el caso #".$id_caso." el dia ".$date_meeting." pendiente aprobacion de la reunion";
 
-      $tipo = "";
+      $tipo = "Reunion pendiente de aprobacion";
 
       $apiNotificaciones->createNotificacionFunction(
         $email_abogado,
         $mensaje,
         $tipo,
-        $id_caso
+        $id_caso,
+        $idReunion
       );
 
       //  Notificar al cliente
@@ -98,19 +116,100 @@ class CalendarioController extends Controller
       foreach($sql as $result)
         $abogado = $result->fullname;
 
-      $mensaje = "Se ha solicitado reunión con el abogado ".$abogado."  para el caso #".$id_caso." el día ".$date_meeting.", pendiente aprobación de la reunión',
-      'Reunión pendiente de aprobación";
+      $mensaje = "Se ha solicitado reunion con el abogado ".$abogado."  para el caso #".$id_caso." el dia ".$date_meeting." pendiente aprobacion de la reunion";
 
-      $tipo = "";
+      $tipo = "Reunion pendiente de aprobacion";
 
       $apiNotificaciones->createNotificacionFunction(
         $email_cliente,
         $mensaje,
         $tipo,
-        $id_caso
+        $id_caso,
+        $idReunion
       );
 
       DB::insert($sqlString);
+
+    }
+
+    /**************************************************************************************** */
+    // CONSULTAR SI UN USUARIO TIENE REUNIONES PENDIENTES POR APROBAR
+    /**************************************************************************************** */
+
+    public function getReunionesPendientes(Request $request){
+
+      //  Parametros de entrada
+
+      $idReunion = $request->idReunion;
+      $email = $request->email;
+
+      //  Consultar si tiene reuniones pendientes por aprobar
+
+      $sqlString = "
+          SELECT
+              *
+          FROM
+              calendario
+          WHERE
+              id = '".$idReunion."' AND
+              status = '1' AND
+              email_aprobacion = '".$email."'
+      ";
+
+      $sql = DB::select($sqlString);
+
+      return response()->json($sql);
+
+    }
+
+    /**************************************************************************************** */
+    // APROBAR REUNION
+    /**************************************************************************************** */
+
+    public function aprobarReunion(Request $request){
+
+      //  Parametros de entrada
+      $idReunion = $request->idReunion;
+
+      //  Aprobar reunión
+
+      $sqlString = "
+        UPDATE 
+          calendario
+        SET
+          status = '2'
+        WHERE
+          id = '".$idReunion."'
+      ";
+
+      DB::update($sqlString);
+
+    }
+
+    /********************************************************************************* */
+    // CONSULTAR REUNIONES DE UN USUARIO
+    /********************************************************************************* */
+
+    public function getReuniones(Request $request){
+
+      //  Parametros de entrada
+      $email = $request->email;
+
+      //  Consultar reuniones
+
+      $sqlString = "
+        SELECT
+          *
+        FROM
+          calendario
+        WHERE
+          email_cliente = '".$email."' OR
+          email_abogado = '".$email."'
+      ";
+
+      $sql = DB::select($sqlString);
+
+      return response()->json($sql);     
 
     }
 

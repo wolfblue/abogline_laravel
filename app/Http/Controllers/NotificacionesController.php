@@ -70,7 +70,8 @@ class NotificacionesController extends Controller
         $email = null,
         $message = null,
         $tipo = null,
-        $idCaso = null
+        $idCaso = null,
+        $idReunion = null
         
     ){
 
@@ -85,7 +86,8 @@ class NotificacionesController extends Controller
                 '".$email."',
                 '".$message."',
                 '".$tipo."',
-                '".$idCaso."'
+                '".$idCaso."',
+                '".$idReunion."'
             )
         ";
         

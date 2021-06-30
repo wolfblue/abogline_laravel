@@ -53,6 +53,7 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "procesosUpdate", "ProcesosController@procesosUpdate");
   Route::match(['post', 'options'], "createProceso", "ProcesosController@createProceso");
   Route::match(['post', 'options'], "rechazarSolicitud", "ProcesosController@rechazarSolicitud");
+  Route::match(['post', 'options'], "getProcesoAbogado", "ProcesosController@getProcesoAbogado");
 
   //  CasosController
 
@@ -60,6 +61,7 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "getCasos", "CasosController@getCasos");
   Route::match(['post', 'options'], "casosUpdate", "CasosController@casosUpdate");
   Route::match(['post', 'options'], "getDataCasoEspecifico", "CasosController@getDataCasoEspecifico");
+  Route::match(['post', 'options'], "getMergeCaso", "CasosController@getMergeCaso");
 
   //  NotificacionesController
   
@@ -76,5 +78,8 @@ Route::group(['middleware' => ['cors']], function () {
 
   //  CalendarioController
   Route::match(['post', 'options'], "agendarReunion", "CalendarioController@agendarReunion");
+  Route::match(['post', 'options'], "getReunionesPendientes", "CalendarioController@getReunionesPendientes");
+  Route::match(['post', 'options'], "aprobarReunion", "CalendarioController@aprobarReunion");
+  Route::match(['post', 'options'], "getReuniones", "CalendarioController@getReuniones");
   
 });
