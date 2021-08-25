@@ -32,54 +32,50 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => ['cors']], function () {
 
-  //  UsuariosController
+  //  AboglineRegisterController
   
-  Route::apiResource("usuarios","UsuariosController");
-  Route::match(['post', 'options'], "createUser", "UsuariosController@createUser");
-  Route::match(['post', 'options'], "getUser", "UsuariosController@getUser");
+  Route::match(['post', 'options'], "apiAboglineRegisterRegistrarUsuario", "AboglineRegisterController@apiAboglineRegisterRegistrarUsuario");
+  Route::match(['post', 'options'], "apiAboglineRegisterConsultarUsuario", "AboglineRegisterController@apiAboglineRegisterConsultarUsuario");
 
-  //  AbogadosController
+  //  AboglineLoginController
+  Route::match(['post', 'options'], "apiAboglineLoginConsultarUsuarioActivo", "AboglineLoginController@apiAboglineLoginConsultarUsuarioActivo");
 
-  Route::apiResource("abogados","AbogadosController");
-  Route::match(['post', 'options'], "abogadosUpdate", "AbogadosController@abogadosUpdate");
-  Route::match(['post', 'options'], "getDataAbogados", "AbogadosController@getDataAbogados");
-  Route::match(['post', 'options'], "getAbogados", "AbogadosController@getAbogados");
-  Route::match(['post', 'options'], "getAbogadoCasosProceso", "AbogadosController@getAbogadoCasosProceso");
+  //  AboglineRegisterCasoController
 
-  //  ProcesosController
+  Route::match(['post', 'options'], "apiAboglineRegisterCasoGetInfo", "AboglineRegisterCasoController@apiAboglineRegisterCasoGetInfo");
+  Route::match(['post', 'options'], "apiAboglineRegisterCaso", "AboglineRegisterCasoController@apiAboglineRegisterCaso");
 
-  Route::match(['post', 'options'], "solicitarConsulta", "ProcesosController@solicitarConsulta");
-  Route::match(['post', 'options'], "getProceso", "ProcesosController@getProceso");
-  Route::match(['post', 'options'], "procesosUpdate", "ProcesosController@procesosUpdate");
-  Route::match(['post', 'options'], "createProceso", "ProcesosController@createProceso");
-  Route::match(['post', 'options'], "rechazarSolicitud", "ProcesosController@rechazarSolicitud");
-  Route::match(['post', 'options'], "getProcesoAbogado", "ProcesosController@getProcesoAbogado");
+  //  AboglineConsultarCasoController
 
-  //  CasosController
+  Route::match(['post', 'options'], "apiAboglineConsultarCasoGetInfo", "AboglineConsultarCasoController@apiAboglineConsultarCasoGetInfo");
+  Route::match(['post', 'options'], "apiAboglineConsultarCasoAplicarCaso", "AboglineConsultarCasoController@apiAboglineConsultarCasoAplicarCaso");
 
-  Route::match(['post', 'options'], "getDataCaso", "CasosController@getDataCaso");
-  Route::match(['post', 'options'], "getCasos", "CasosController@getCasos");
-  Route::match(['post', 'options'], "casosUpdate", "CasosController@casosUpdate");
-  Route::match(['post', 'options'], "getDataCasoEspecifico", "CasosController@getDataCasoEspecifico");
-  Route::match(['post', 'options'], "getMergeCaso", "CasosController@getMergeCaso");
+  //  AboglineProfileController
 
-  //  NotificacionesController
+  Route::match(['post', 'options'], "apiAboglineProfileGetInfo", "AboglineProfileController@apiAboglineProfileGetInfo");
+  Route::match(['post', 'options'], "apiAboglineProfileUpdateUserCliente", "AboglineProfileController@apiAboglineProfileUpdateUserCliente");
+  Route::match(['post', 'options'], "apiAboglineProfileUpdateUserAbogado", "AboglineProfileController@apiAboglineProfileUpdateUserAbogado");
+
+  //  AboglineSolicitudesController
   
-  Route::match(['post', 'options'], "getNotificacion", "NotificacionesController@getNotificacion");
-  Route::match(['post', 'options'], "notificacionLeido", "NotificacionesController@notificacionLeido");
-  Route::match(['post', 'options'], "createNotificacion", "NotificacionesController@createNotificacion");
-  Route::match(['post', 'options'], "deleteNotificacion", "NotificacionesController@deleteNotificacion");
+  Route::match(['post', 'options'], "apiAboglineSolicitudesGetInfo", "AboglineSolicitudesController@apiAboglineSolicitudesGetInfo");
+  Route::match(['post', 'options'], "apiAboglineSolicitudesAprobar", "AboglineSolicitudesController@apiAboglineSolicitudesAprobar");
+  Route::match(['post', 'options'], "apiAboglineSolicitudesRechazar", "AboglineSolicitudesController@apiAboglineSolicitudesRechazar");  
 
-  //  ClientesController
+  //  AboglineAgendarController
+  
+  Route::match(['post', 'options'], "apiAboglineAgendarGetInfo", "AboglineAgendarController@apiAboglineAgendarGetInfo");
+  Route::match(['post', 'options'], "apiAboglineAgendar", "AboglineAgendarController@apiAboglineAgendar");
 
-  Route::apiResource("clientes","ClientesController");
-  Route::match(['post', 'options'], "getDataClientes", "ClientesController@getDataClientes");
-  Route::match(['post', 'options'], "clientesUpdate", "ClientesController@clientesUpdate");
+  //  AboglineCalendarController
+  Route::match(['post', 'options'], "apiAboglineCalendarGetInfo", "AboglineCalendarController@apiAboglineCalendarGetInfo");
 
-  //  CalendarioController
-  Route::match(['post', 'options'], "agendarReunion", "CalendarioController@agendarReunion");
-  Route::match(['post', 'options'], "getReunionesPendientes", "CalendarioController@getReunionesPendientes");
-  Route::match(['post', 'options'], "aprobarReunion", "CalendarioController@aprobarReunion");
-  Route::match(['post', 'options'], "getReuniones", "CalendarioController@getReuniones");
+  //  AboglinePagosController
+  Route::match(['post', 'options'], "apiAboglinePagosGetInfo", "AboglinePagosController@apiAboglinePagosGetInfo");
+
+  //  AboglineAbogadosController
+
+  Route::match(['post', 'options'], "apiAboglineAbogadosGetInfo", "AboglineAbogadosController@apiAboglineAbogadosGetInfo");
+  Route::match(['post', 'options'], "apiAboglineAbogadosAplicar", "AboglineAbogadosController@apiAboglineAbogadosAplicar");
   
 });

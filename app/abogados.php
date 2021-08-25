@@ -22,5 +22,5 @@ class abogados extends Model
         "pleasures_other",
         "price",
         "cv"
-    ];
+    ]; 
 }
