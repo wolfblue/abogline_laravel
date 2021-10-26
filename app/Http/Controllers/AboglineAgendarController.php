@@ -161,7 +161,8 @@ class AboglineAgendarController extends Controller{
                 'pendiente',
                 '".$idCaso."',
                 '".$fechaAgendar."',
-                '".$idPeticion."'
+                '".$idPeticion."',
+                ''
             )
         ";
 

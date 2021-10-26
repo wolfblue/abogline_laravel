@@ -25,7 +25,8 @@ class AboglineCalendarController extends Controller{
 
         $sqlString = "
             SELECT
-                fecha
+                A.fecha,
+                A.link
             FROM
                 abogline_agendas A,
                 abogline_peticiones B

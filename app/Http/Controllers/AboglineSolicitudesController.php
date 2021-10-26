@@ -136,6 +136,24 @@ class AboglineSolicitudesController extends Controller{
         
                 DB::update($sqlString);
 
+                // Consultar valor de la consulta
+
+                $valor = "0";
+
+                $sqlString = "
+                    SELECT
+                        cost_consulta
+                    FROM
+                        abogline_usuarios
+                    WHERE
+                        usuario = '".$abogado."'
+                ";
+
+                $sql = DB::select($sqlString);
+
+                foreach($sql as $result)
+                    $valor = $result->costo_consulta;
+
                 //  Generar primer pago
 
                 $sqlString = "
@@ -146,7 +164,8 @@ class AboglineSolicitudesController extends Controller{
                         now(),
                         'pendiente',
                         'Pago pendiente para la consulta con el abogado del caso ".$idCaso."',
-                        '".$idCaso."'
+                        '".$idCaso."',
+                        '".$valor."'
                     )
                 ";
 

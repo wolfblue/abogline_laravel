@@ -77,5 +77,29 @@ Route::group(['middleware' => ['cors']], function () {
 
   Route::match(['post', 'options'], "apiAboglineAbogadosGetInfo", "AboglineAbogadosController@apiAboglineAbogadosGetInfo");
   Route::match(['post', 'options'], "apiAboglineAbogadosAplicar", "AboglineAbogadosController@apiAboglineAbogadosAplicar");
+
+  //  AboglineSolicitarDocumentacionController
+  Route::match(['post', 'options'], "apiAboglineSolicitarDocumentacion", "AboglineSolicitarDocumentacionController@apiAboglineSolicitarDocumentacion");
+
+  //  AboglineCargarDocumentacionController
+
+  Route::match(['post', 'options'], "apiAboglineCargarDocumentacionGetInfo", "AboglineCargarDocumentacionController@apiAboglineCargarDocumentacionGetInfo");
+  Route::match(['post', 'options'], "apiAboglineCargarDocumentacionPeticiones", "AboglineCargarDocumentacionController@apiAboglineCargarDocumentacionPeticiones");
+  Route::match(['post', 'options'], "apiAboglineCargarDocumentacionRespuesta", "AboglineCargarDocumentacionController@apiAboglineCargarDocumentacionRespuesta");
+
+  //  AboglineConsultarDocumentacionController
+  
+  Route::match(['post', 'options'], "apiAboglineConsultarDocumentacionGetInfo", "AboglineConsultarDocumentacionController@apiAboglineConsultarDocumentacionGetInfo");
+  Route::match(['post', 'options'], "apiAboglineConsultarDocumentacionGetDocumentos", "AboglineConsultarDocumentacionController@apiAboglineConsultarDocumentacionGetDocumentos");
+
+  //  AboglineUsuariosController
+
+  Route::match(['post', 'options'], "apiAboglineUsuariosGetInfo", "AboglineUsuariosController@apiAboglineUsuariosGetInfo");
+  Route::match(['post', 'options'], "apiAboglineUsuariosUpdate", "AboglineUsuariosController@apiAboglineUsuariosUpdate");
+
+  //  AboglineAdminAgendasController
+  
+  Route::match(['post', 'options'], "apiAboglineAdminAgendasGetInfo", "AboglineAdminAgendasController@apiAboglineAdminAgendasGetInfo");
+  Route::match(['post', 'options'], "apiAboglineAdminAgendaUpdate", "AboglineAdminAgendasController@apiAboglineAdminAgendaUpdate");
   
 });
