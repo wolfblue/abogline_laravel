@@ -25,7 +25,10 @@ class UsuariosController extends Controller{
             FROM
                 usuarios
             WHERE
-                usuario = '".$usuario."'
+                (
+                    usuario = '".$usuario."' OR
+                    email = '".$usuario."'
+                )
         ";
 
         $sql = DB::select($sqlString);
@@ -54,7 +57,10 @@ class UsuariosController extends Controller{
             FROM
                 usuarios
             WHERE
-                usuario = '".$usuario."' AND
+                (
+                    usuario = '".$usuario."' OR
+                    email = '".$usuario."'
+                )   AND
                 password = '".$password."'
         ";
 
@@ -76,6 +82,7 @@ class UsuariosController extends Controller{
         $usuario = $request->usuario;
         $email = $request->email;
         $password = $request->password;
+        $perfil = $request->perfil;
 
         //  Insertar usuario
 
@@ -83,7 +90,27 @@ class UsuariosController extends Controller{
             INSERT INTO usuarios VALUES (
                 '".$usuario."',
                 '".$email."',
-                '".$password."'
+                '".$password."',
+                '".$perfil."',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                now(),
+                'true',
+                'true',
+                '',
+                '',
+                '',
+                ''
             )
         ";
 
@@ -91,4 +118,98 @@ class UsuariosController extends Controller{
         
     }
 
+    /********************************************************************************** */
+    // ACTUALIZAR USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosUpdateUser(Request $request){
+
+        //  Parametros de entrada
+
+        $nombres = $request->nombres;
+        $apellidos = $request->apellidos;
+        $usuario = $request->usuario;
+        $email = $request->email;
+        $tipoIdentificacion = $request->tipoIdentificacion;
+        $identificacion = $request->identificacion;
+        $genero = $request->genero;
+        $telefonoContacto = $request->telefonoContacto;
+        $ciudad = $request->ciudad;
+        $facebook = $request->facebook;
+        $twitter = $request->twitter;
+        $instagram = $request->instagram;
+        $notificacionEmail = $request->notificacionEmail;
+        $notificacionSMS = $request->notificacionSMS;
+
+        //  Actualizar usuario
+
+        $sqlString = "
+            UPDATE usuarios SET 
+                nombres = '".$nombres."',
+                apellidos = '".$apellidos."',
+                email = '".$email."',
+                tipo_identificacion = '".$tipoIdentificacion."',
+                identificacion = '".$identificacion."',
+                genero = '".$genero."',
+                telefono_contacto = '".$telefonoContacto."',
+                ciudad = '".$ciudad."',
+                facebook = '".$facebook."',
+                twitter = '".$twitter."',
+                instagram = '".$instagram."',
+                notificacion_email = '".$notificacionEmail."',
+                notificacion_sms = '".$notificacionSMS."'
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        DB::update($sqlString);
+        
+    }
+
+    /********************************************************************************** */
+    // ACTUALIZAR  CONTRASEÑA DEL USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosUpdateUserPassword(Request $request){
+
+        //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $password = $request->password;
+
+        //  Actualizar contraseña
+
+        $sqlString = "
+            UPDATE usuarios SET 
+                password = '".$password."'
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        DB::update($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // ACTUALIZAR  FOTO DEL USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosUpdatePhoto(Request $request){
+
+        //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $base64 = $request->base64;
+        $ext = $request->ext;
+
+        //  Actualizar ruta de la foto
+
+        $sqlString = "UPDATE usuarios SET foto = 'photo/".$usuario.".".$ext."' WHERE usuario = '".$usuario."'";
+        DB::update($sqlString);
+
+        //  Guardar archivo en físico
+
+        file_put_contents("photo/".$usuario.".".$ext, file_get_contents($base64));
+
+    }
 }
