@@ -30,5 +30,13 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAdminTipoDocumentoRegister", "AdminController@apiAdminTipoDocumentoRegister");
   Route::match(['post', 'options'], "apiAdminTipoDocumentoGet", "AdminController@apiAdminTipoDocumentoGet");
   Route::match(['post', 'options'], "apiAdminTipoDocumentoDelete", "AdminController@apiAdminTipoDocumentoDelete");
+  Route::match(['post', 'options'], "apiAdminMunicipioRegister", "AdminController@apiAdminMunicipioRegister");
+  Route::match(['post', 'options'], "apiAdminMunicipioGet", "AdminController@apiAdminMunicipioGet");
+  Route::match(['post', 'options'], "apiAdminMunicipioDelete", "AdminController@apiAdminMunicipioDelete");
+  Route::match(['post', 'options'], "apiAdminUpdate", "AdminController@apiAdminUpdate");
+  Route::match(['post', 'options'], "apiAdminGetContenido", "AdminController@apiAdminGetContenido");
+  Route::match(['post', 'options'], "apiAdminTituloRegister", "AdminController@apiAdminTituloRegister");
+  Route::match(['post', 'options'], "apiAdminTituloGet", "AdminController@apiAdminTituloGet");
+  Route::match(['post', 'options'], "apiAdminTituloDelete", "AdminController@apiAdminTituloDelete");
   
 });

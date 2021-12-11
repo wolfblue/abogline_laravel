@@ -107,9 +107,16 @@ class UsuariosController extends Controller{
                 now(),
                 'true',
                 'true',
+                'false',
+                'false',
+                'false',
                 '',
                 '',
                 '',
+                'false',
+                'false',
+                'false',
+                'false',
                 ''
             )
         ";
@@ -140,6 +147,9 @@ class UsuariosController extends Controller{
         $instagram = $request->instagram;
         $notificacionEmail = $request->notificacionEmail;
         $notificacionSMS = $request->notificacionSMS;
+        $direccion = $request->direccion;
+        $municipio = $request->municipio;
+        $nacimiento = $request->nacimiento;
 
         //  Actualizar usuario
 
@@ -157,7 +167,10 @@ class UsuariosController extends Controller{
                 twitter = '".$twitter."',
                 instagram = '".$instagram."',
                 notificacion_email = '".$notificacionEmail."',
-                notificacion_sms = '".$notificacionSMS."'
+                notificacion_sms = '".$notificacionSMS."',
+                direccion = '".$direccion."',
+                municipio = '".$municipio."',
+                nacimiento = '".$nacimiento."'
             WHERE
                 usuario = '".$usuario."'
         ";

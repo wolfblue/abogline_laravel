@@ -83,7 +83,7 @@ class AdminController extends Controller{
     }
 
     /********************************************************************************** */
-    // REGISTRAR GENERO
+    // CONSULTAR GENEROS
     /********************************************************************************** */
 
     public function apiAdminGeneroGet(Request $request){
@@ -163,6 +163,152 @@ class AdminController extends Controller{
         //  Eliminar tipo de documento
 
         $sqlString = "DELETE FROM tipos_documentos WHERE tipo_documento = '".$tipoDocumento."'";
+        DB::delete($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // REGISTRAR MUNICIPIO
+    /********************************************************************************** */
+
+    public function apiAdminMunicipioRegister(Request $request){
+
+        //  Parametro de entrada
+        $municipio = $request->municipio;
+
+        //  Eliminar municipio si existe
+
+        $sqlString = "DELETE FROM municipios WHERE municipio = '".$municipio."'";
+        DB::delete($sqlString);
+
+        //  Registrar municipio
+
+        $sqlString = "INSERT INTO municipios VALUES ('".$municipio."')";
+        DB::insert($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR MUNICIPIOS
+    /********************************************************************************** */
+
+    public function apiAdminMunicipioGet(Request $request){
+
+        //  Consultar municipios
+
+        $sqlString = "SELECT * FROM municipios ORDER BY 1";
+        $sql = DB::select($sqlString);
+
+        //  Retornar municipios
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // ELIMINAR MUNICIPIO
+    /********************************************************************************** */
+
+    public function apiAdminMunicipioDelete(Request $request){
+
+        //  Parametros de entrada
+        $municipio = $request->municipio;
+
+        //  Eliminar municipio
+
+        $sqlString = "DELETE FROM municipios WHERE municipio = '".$municipio."'";
+        DB::delete($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // ACTUALIZAR ADMIN
+    /********************************************************************************** */
+
+    public function apiAdminUpdate(Request $request){
+
+        //  Parametros de entrada
+
+        $tipo = $request->tipo;
+        $contenido = $request->contenido;
+
+        //  Actualizar acerca de
+        
+        $sqlString = "DELETE FROM admin WHERE tipo = '".$tipo."'";
+        DB::delete($sqlString);
+
+        $sqlString = "INSERT INTO admin VALUES ('".$tipo."','".$contenido."')";
+        DB::insert($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR ADMINISTRACIÓN
+    /********************************************************************************** */
+
+    public function apiAdminGetContenido(Request $request){
+
+        //  Parametros de entrada
+        $tipo = $request->tipo;
+
+        //  Consultar contenido
+
+        $sqlString = "SELECT * FROM admin WHERE tipo = '".$tipo."'";
+        $sql = DB::select($sqlString);
+
+        //  Retornar municipios
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // REGISTRAR TITULO
+    /********************************************************************************** */
+
+    public function apiAdminTituloRegister(Request $request){
+
+        //  Parametro de entrada
+        $titulo = $request->titulo;
+
+        //  Eliminar titulo si existe
+
+        $sqlString = "DELETE FROM titulos_hv WHERE titulo = '".$titulo."'";
+        DB::delete($sqlString);
+
+        //  Registrar titulo
+
+        $sqlString = "INSERT INTO titulos_hv VALUES ('".$titulo."')";
+        DB::insert($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR TITULOS
+    /********************************************************************************** */
+
+    public function apiAdminTituloGet(Request $request){
+
+        //  Consultar titulos
+
+        $sqlString = "SELECT * FROM titulos_hv ORDER BY 1";
+        $sql = DB::select($sqlString);
+
+        //  Retornar titulos
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // ELIMINAR TITULO
+    /********************************************************************************** */
+
+    public function apiAdminTituloDelete(Request $request){
+
+        //  Parametros de entrada
+        $titulo = $request->titulo;
+
+        //  Eliminar titulo
+
+        $sqlString = "DELETE FROM titulos_hv WHERE titulo = '".$titulo."'";
         DB::delete($sqlString);
 
     }
