@@ -117,6 +117,16 @@ class UsuariosController extends Controller{
                 'false',
                 'false',
                 'false',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
                 ''
             )
         ";
@@ -225,4 +235,24 @@ class UsuariosController extends Controller{
         file_put_contents("photo/".$usuario.".".$ext, file_get_contents($base64));
 
     }
+
+    /********************************************************************************** */
+    // ACTUALIZAR  CAMPO DE REGISTRO DE USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosUpdateField(Request $request){
+
+        //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $field = $request->field;
+        $value = $request->value;
+
+        //  Actualizar registro
+
+        $sqlString = "UPDATE usuarios SET ".$field." = '".$value."' WHERE usuario = '".$usuario."'";
+        DB::update($sqlString);
+
+    }
+
 }

@@ -10,15 +10,6 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => ['cors']], function () {
 
-  //  Usuarios
-
-  Route::match(['post', 'options'], "apiUsuariosGetUser", "UsuariosController@apiUsuariosGetUser");
-  Route::match(['post', 'options'], "apiUsuariosInsertUser", "UsuariosController@apiUsuariosInsertUser");
-  Route::match(['post', 'options'], "apiUsuariosGetUserPassword", "UsuariosController@apiUsuariosGetUserPassword");
-  Route::match(['post', 'options'], "apiUsuariosUpdateUser", "UsuariosController@apiUsuariosUpdateUser");
-  Route::match(['post', 'options'], "apiUsuariosUpdateUserPassword", "UsuariosController@apiUsuariosUpdateUserPassword");
-  Route::match(['post', 'options'], "apiUsuariosUpdatePhoto", "UsuariosController@apiUsuariosUpdatePhoto");
-
   //  Administrador
   
   Route::match(['post', 'options'], "apiAdminCiudadRegister", "AdminController@apiAdminCiudadRegister");
@@ -38,5 +29,21 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAdminTituloRegister", "AdminController@apiAdminTituloRegister");
   Route::match(['post', 'options'], "apiAdminTituloGet", "AdminController@apiAdminTituloGet");
   Route::match(['post', 'options'], "apiAdminTituloDelete", "AdminController@apiAdminTituloDelete");
+
+  //  Casos
+
+  Route::match(['post', 'options'], "apiRegistrarCaso", "CasosController@apiRegistrarCaso");
+  Route::match(['post', 'options'], "apiConsultarCasos", "CasosController@apiConsultarCasos");
+  Route::match(['post', 'options'], "apiEliminarCaso", "CasosController@apiEliminarCaso");
+
+  //  Usuarios
+
+  Route::match(['post', 'options'], "apiUsuariosGetUser", "UsuariosController@apiUsuariosGetUser");
+  Route::match(['post', 'options'], "apiUsuariosInsertUser", "UsuariosController@apiUsuariosInsertUser");
+  Route::match(['post', 'options'], "apiUsuariosGetUserPassword", "UsuariosController@apiUsuariosGetUserPassword");
+  Route::match(['post', 'options'], "apiUsuariosUpdateUser", "UsuariosController@apiUsuariosUpdateUser");
+  Route::match(['post', 'options'], "apiUsuariosUpdateUserPassword", "UsuariosController@apiUsuariosUpdateUserPassword");
+  Route::match(['post', 'options'], "apiUsuariosUpdatePhoto", "UsuariosController@apiUsuariosUpdatePhoto");
+  Route::match(['post', 'options'], "apiUsuariosUpdateField", "UsuariosController@apiUsuariosUpdateField");
   
 });
