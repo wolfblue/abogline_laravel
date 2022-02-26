@@ -38,7 +38,19 @@ class CasosController extends Controller{
                     '".$cuentanos."',
                     '".$usuario."',
                     now(),
-                    '1'
+                    '1',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    ''
                 )
             ";
 
@@ -77,12 +89,13 @@ class CasosController extends Controller{
         $trataCaso = $request->trataCaso;
         $cualProblema = $request->cualProblema;
         $id = $request->id;
+        $perfil = $request->perfil;
 
         //  Condiciones
 
         $where = "";
 
-        if($usuario)
+        if($usuario && $perfil != "abogado")
             $where .= " AND usuario = '".$usuario."'";
 
         if($trataCaso)
@@ -96,6 +109,21 @@ class CasosController extends Controller{
 
         //  Consultar casos
 
+        if($perfil == "abogado"){
+
+            /*$where .= " AND id IN (
+                SELECT
+                    id_caso
+                FROM
+                    casos_usuario
+                WHERE
+                    abogado = '".$usuario."' AND
+                    estado_usuario = 'aceptado' AND
+                    estado_abogado = 'aceptado'
+            )";*/
+
+        }
+
         $sqlString = "
             SELECT 
                 id,
@@ -106,9 +134,23 @@ class CasosController extends Controller{
                 cual_problema,
                 (
                     CASE WHEN estado = '1' then 'Registrado' ELSE '' END
-                ) AS estado
+                ) AS estado,
+                estado AS estado_original,
+                paso1_pago_asesoria,
+                paso2_asesoria,
+                paso3_decision_continuidad,
+                paso4_generar_cita,
+                paso5_contratacion,
+                paso6_firmar_contrato,
+                paso7_finalizar_contrato,
+                paso8_pagos,
+                paso9_reunion_virtual,
+                paso10_documentacion,
+                paso11_reunion_presencial,
+                paso12_informacion,
+                usuario
             FROM 
-                casos 
+                casos
             WHERE 
                 1=1 ".$where;
 
@@ -132,6 +174,106 @@ class CasosController extends Controller{
 
         $sqlString = "DELETE FROM casos WHERE id = '".$id."'";
         DB::delete($sqlString);
+
+    }
+
+    /***************************************************************************** */
+    //  Usuario asocia abogado
+    /***************************************************************************** */
+
+    public function apiCasosUsuarioAsociarAbogado(Request $request){
+
+        //  Parametros de entada
+
+        $idCaso = $request->idCaso;
+        $abogado = $request->abogado;
+        $estadoUsuario = $request->estadoUsuario;
+        $estadoAbogado = $request->estadoAbogado;
+
+        //  Validar si existe relación
+
+        $existe = 0;
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                abogado = '".$abogado."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $existe = 1;
+
+        //  Asociar abogado si no existe
+
+        if($existe == 0){
+
+            $sqlString = "
+                INSERT INTO casos_usuario VALUES (
+                    '".$idCaso."',
+                    '".$abogado."',
+                    '".$estadoUsuario."',
+                    '".$estadoAbogado."'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }else{
+
+            if($estadoUsuario == "aceptado"){
+
+                $sqlString = "
+                    UPDATE casos_usuario SET estado_usuario = 'aceptado' WHERE id_caso = '".$idCaso."'
+                ";
+
+            }else{
+
+                $sqlString = "
+                    UPDATE casos_usuario SET estado_abogado = 'aceptado' WHERE id_caso = '".$idCaso."'
+                ";
+
+            }
+
+            DB::update($sqlString);
+
+        }
+
+        //  Actualizar estado del caso
+
+        $estadoUsuario = "pendiente";
+        $estadoAbogado = "pendiente";
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result){
+            
+            $estadoUsuario = $result->estado_usuario;
+            $estadoAbogado = $result->estado_abogado;
+
+        }
+
+        if($estadoUsuario == "aceptado" && $estadoAbogado == "aceptado"){
+
+            $sqlString = "UPDATE casos SET estado = '2' WHERE id = '".$idCaso."'";
+
+            DB::update($sqlString);
+
+        }
 
     }
 

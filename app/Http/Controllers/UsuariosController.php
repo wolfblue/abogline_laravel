@@ -72,6 +72,78 @@ class UsuariosController extends Controller{
     }
 
     /********************************************************************************** */
+    // CONSULTAR TITULOS DE UN USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosGetTitulos(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                titulos_hv_usuario
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar titulos del usuario
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR DOCUMENTOS DE UN USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosGetDocumentos(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                usuarios_documentos
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar titulos del usuario
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR ABOGADOS
+    /********************************************************************************** */
+
+    public function apiUsuariosGetAbogados(Request $request){
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                usuarios
+            WHERE
+                perfil = 'abogado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar titulos del usuario
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
     // INSERTAR USUARIO
     /********************************************************************************** */
 
@@ -125,6 +197,21 @@ class UsuariosController extends Controller{
                 '',
                 '',
                 '',
+                '',
+                '',
+                '',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Registrar titulo asignar para abogados
+
+        $sqlString = "
+            INSERT INTO titulos_hv_usuario values (
+                '0',
+                '".$usuario."',
                 '',
                 '',
                 ''
@@ -252,6 +339,98 @@ class UsuariosController extends Controller{
 
         $sqlString = "UPDATE usuarios SET ".$field." = '".$value."' WHERE usuario = '".$usuario."'";
         DB::update($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // INSERTAR TITULO A UN USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosInsertTitulo(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+    
+        //  Registrar titulo asignar para abogados
+
+        $sqlString = "
+            INSERT INTO titulos_hv_usuario values (
+                '0',
+                '".$usuario."',
+                '',
+                '',
+                ''
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // ELIMINAR TITULO DE UN USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosDeleteTitulo(Request $request){
+
+        //  Parametros de entrada
+        $id = $request->id;
+    
+        //  Registrar titulo asignar para abogados
+
+        $sqlString = "DELETE FROM titulos_hv_usuario WHERE id = '".$id."'";
+
+        DB::delete($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // ACTUALIZAR CAMPO DE TÍTULOS DE UN USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosUpdateFieldTitulo(Request $request){
+
+        //  Parametros de entrada
+
+        $id = $request->id;
+        $field = $request->field;
+        $value = $request->value;
+
+        //  Actualizar registro
+
+        $sqlString = "UPDATE titulos_hv_usuario SET ".$field." = '".$value."' WHERE id = '".$id."'";
+        DB::update($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // ACTUALIZAR DOCUMENTO DE USUARIO
+    /********************************************************************************** */
+
+    public function apiUsuariosUpdateDocumento(Request $request){
+
+        //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $tipo = $request->tipo;
+        $base64 = $request->base64;
+
+        //  Eliminar registro actual
+
+        $sqlString = "DELETE FROM usuarios_documentos WHERE tipo = '".$tipo."' ";
+        DB::delete($sqlString);
+
+        //  Insertar registro
+
+        $sqlString = "
+            INSERT INTO usuarios_documentos VALUES (
+                '".$usuario."',
+                '".$tipo."',
+                '".$base64."'
+            )
+        ";
+
+        DB::insert($sqlString);
 
     }
 

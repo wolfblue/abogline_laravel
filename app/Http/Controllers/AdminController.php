@@ -313,4 +313,85 @@ class AdminController extends Controller{
 
     }
 
+    /********************************************************************************** */
+    // CONSULTAR USUARIOS
+    /********************************************************************************** */
+
+    public function apiAdminGetUsuarios(Request $request){
+
+        //  Consultar usuarios
+
+        $sqlString = "SELECT * FROM usuarios ORDER BY usuario";
+        $sql = DB::select($sqlString);
+
+        //  Retornar titulos
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR DOCUMENTOS DE UN USUARIO
+    /********************************************************************************** */
+
+    public function apiAdminGetDocumentosUser(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+
+        //  Consultar usuarios
+
+        $sqlString = "SELECT * FROM usuarios_documentos WHERE usuario = '".$usuario."' ORDER BY tipo";
+        $sql = DB::select($sqlString);
+
+        //  Retornar titulos
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // APROBAR ABOGADO
+    /********************************************************************************** */
+
+    public function apiAdminAprobarAbogado(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+
+        //  Consultar usuarios
+
+        $sqlString = "
+            UPDATE 
+                usuarios
+            SET
+                estado = '2'
+            WHERE
+                usuario = '".$usuario."'
+        ";
+        DB::update($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // RECHAZAR ABOGADO
+    /********************************************************************************** */
+
+    public function apiAdminRechazarAbogado(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+
+        //  Consultar usuarios
+
+        $sqlString = "
+            UPDATE 
+                usuarios
+            SET
+                estado = '3'
+            WHERE
+                usuario = '".$usuario."'
+        ";
+        DB::update($sqlString);
+
+    }
+
 }

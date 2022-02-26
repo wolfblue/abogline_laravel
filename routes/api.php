@@ -29,12 +29,17 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAdminTituloRegister", "AdminController@apiAdminTituloRegister");
   Route::match(['post', 'options'], "apiAdminTituloGet", "AdminController@apiAdminTituloGet");
   Route::match(['post', 'options'], "apiAdminTituloDelete", "AdminController@apiAdminTituloDelete");
+  Route::match(['post', 'options'], "apiAdminGetUsuarios", "AdminController@apiAdminGetUsuarios");
+  Route::match(['post', 'options'], "apiAdminGetDocumentosUser", "AdminController@apiAdminGetDocumentosUser");
+  Route::match(['post', 'options'], "apiAdminAprobarAbogado", "AdminController@apiAdminAprobarAbogado");
+  Route::match(['post', 'options'], "apiAdminRechazarAbogado", "AdminController@apiAdminRechazarAbogado");
 
   //  Casos
 
   Route::match(['post', 'options'], "apiRegistrarCaso", "CasosController@apiRegistrarCaso");
   Route::match(['post', 'options'], "apiConsultarCasos", "CasosController@apiConsultarCasos");
   Route::match(['post', 'options'], "apiEliminarCaso", "CasosController@apiEliminarCaso");
+  Route::match(['post', 'options'], "apiCasosUsuarioAsociarAbogado", "CasosController@apiCasosUsuarioAsociarAbogado");
 
   //  Usuarios
 
@@ -45,5 +50,19 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiUsuariosUpdateUserPassword", "UsuariosController@apiUsuariosUpdateUserPassword");
   Route::match(['post', 'options'], "apiUsuariosUpdatePhoto", "UsuariosController@apiUsuariosUpdatePhoto");
   Route::match(['post', 'options'], "apiUsuariosUpdateField", "UsuariosController@apiUsuariosUpdateField");
+  Route::match(['post', 'options'], "apiUsuariosGetTitulos", "UsuariosController@apiUsuariosGetTitulos");
+  Route::match(['post', 'options'], "apiUsuariosInsertTitulo", "UsuariosController@apiUsuariosInsertTitulo");
+  Route::match(['post', 'options'], "apiUsuariosDeleteTitulo", "UsuariosController@apiUsuariosDeleteTitulo");
+  Route::match(['post', 'options'], "apiUsuariosUpdateFieldTitulo", "UsuariosController@apiUsuariosUpdateFieldTitulo");
+  Route::match(['post', 'options'], "apiUsuariosUpdateDocumento", "UsuariosController@apiUsuariosUpdateDocumento");
+  Route::match(['post', 'options'], "apiUsuariosGetDocumentos", "UsuariosController@apiUsuariosGetDocumentos");
+  Route::match(['post', 'options'], "apiUsuariosGetAbogados", "UsuariosController@apiUsuariosGetAbogados");
+
+  //  Core
+
+  Route::match(['post', 'options'], "apiCoreChatSave", "CoreController@apiCoreChatSave");
+  Route::match(['post', 'options'], "apiCoreChatGet", "CoreController@apiCoreChatGet");
+  Route::match(['post', 'options'], "apiCoreAbogadoGet", "CoreController@apiCoreAbogadoGet");
+  Route::match(['post', 'options'], "apiCoreCalendarioSave", "CoreController@apiCoreCalendarioSave");
   
 });
