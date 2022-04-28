@@ -378,6 +378,33 @@ class AdminController extends Controller{
     public function apiAdminRechazarAbogado(Request $request){
 
         //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $motivo = $request->motivo;
+
+        //  Consultar usuarios
+
+        $sqlString = "
+            UPDATE 
+                usuarios
+            SET
+                estado = '3',
+                motivo_rechazo = '".$motivo."'
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        DB::update($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // BLOQUEAR USUARIO
+    /********************************************************************************** */
+
+    public function apiAdminBloquearUsuario(Request $request){
+
+        //  Parametros de entrada
         $usuario = $request->usuario;
 
         //  Consultar usuarios
@@ -386,11 +413,175 @@ class AdminController extends Controller{
             UPDATE 
                 usuarios
             SET
-                estado = '3'
+                estado = '4'
             WHERE
                 usuario = '".$usuario."'
         ";
         DB::update($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR SOLICITUDES
+    /********************************************************************************** */
+
+    public function apiConsultarSolicitudes(Request $request){
+
+        //  Insertar nuevas solicitudes de reunión por generar link
+
+        $sqlString = "
+            SELECT
+                id,
+                id_caso,
+                usuario
+            FROM
+                calendario
+            WHERE
+                link = '' AND
+                estado = '2' AND
+                id NOT IN (
+                    SELECT
+                        id_calendario
+                    FROM
+                        solicitudes
+                )
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result){
+
+            $idCalendario = $result->id;
+            $idCaso = $result->id_caso;
+            $usuario = $result->usuario;
+
+            $sqlString = "
+                INSERT INTO solicitudes VALUES (
+                    '0',
+                    '".$usuario."',
+                    'Reunion',
+                    'Generar link para reunión',
+                    '1',
+                    '".$idCaso."',
+                    '".$idCalendario."'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
+
+        //  Consultar solicitudes
+
+        $sqlString = "
+            SELECT
+                solicitudes.id,
+                solicitudes.usuario,
+                solicitudes.tipo_solicitud,
+                solicitudes.solicitud,
+                solicitudes.estado,
+                solicitudes.id_calendario,
+                usuarios.email,
+                usuarios.perfil
+            FROM
+                solicitudes,
+                usuarios
+            WHERE
+                solicitudes.usuario = usuarios.usuario AND
+                solicitudes.estado = 1
+        ";
+
+        $sql = DB::select($sqlString);
+
+        return response()->json($sql);
+
+    }
+
+    /********************************************************************************** */
+    // APROBAR SOLICITUD
+    /********************************************************************************** */
+
+    public function apiAprobarSolicitud(Request $request){
+
+        //  Parametros de entrada
+        $id = $request->id;
+
+        //  Aprobar solicitud
+        DB::update("UPDATE solicitudes SET estado = 'Aprobado' WHERE id = '".$id."'");
+
+        //  Validar solicitud
+
+        $sqlString = "
+            SELECT
+                solicitud,
+                id_caso
+            FROM
+                solicitudes
+            WHERE
+                id = '".$id."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result){
+
+            $solicitud = $result->solicitud;
+            $idCaso = $result->id_caso;
+
+            switch($solicitud){
+
+                case "Finalizar contrato":
+
+                    $sqlString = "UPDATE casos SET paso7_finalizar_contrato = 'proceso' WHERE id = '".$idCaso."'";
+                    DB::update($sqlString);
+                
+                break;
+
+                case "Pagos":
+
+                    $sqlString = "UPDATE casos SET paso8_pagos = 'proceso' WHERE id = '".$idCaso."'";
+                    DB::update($sqlString);
+                
+                break;
+
+            }
+
+        }
+
+    }
+
+    /********************************************************************************** */
+    // RECHAZAR SOLICITUD
+    /********************************************************************************** */
+
+    public function apiRechazarSolicitud(Request $request){
+
+        //  Parametros de entrada
+        $id = $request->id;
+
+        //  Aprobar solicitud
+        DB::update("UPDATE solicitudes SET estado = 'Rechazado' WHERE id = '".$id."'");
+
+    }
+
+    /********************************************************************************** */
+    // CONSULTAR ADMIN
+    /********************************************************************************** */
+
+    public function apiAdminConsulta(Request $request){
+
+        //  Consultar admin
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                admin
+        ";
+
+        $sql = DB::select($sqlString);
+
+        return response()->json($sql);
 
     }
 

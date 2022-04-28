@@ -33,6 +33,11 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAdminGetDocumentosUser", "AdminController@apiAdminGetDocumentosUser");
   Route::match(['post', 'options'], "apiAdminAprobarAbogado", "AdminController@apiAdminAprobarAbogado");
   Route::match(['post', 'options'], "apiAdminRechazarAbogado", "AdminController@apiAdminRechazarAbogado");
+  Route::match(['post', 'options'], "apiAdminBloquearUsuario", "AdminController@apiAdminBloquearUsuario");
+  Route::match(['post', 'options'], "apiConsultarSolicitudes", "AdminController@apiConsultarSolicitudes");
+  Route::match(['post', 'options'], "apiAprobarSolicitud", "AdminController@apiAprobarSolicitud");
+  Route::match(['post', 'options'], "apiRechazarSolicitud", "AdminController@apiRechazarSolicitud");
+  Route::match(['post', 'options'], "apiAdminConsulta", "AdminController@apiAdminConsulta");
 
   //  Casos
 
@@ -64,5 +69,17 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiCoreChatGet", "CoreController@apiCoreChatGet");
   Route::match(['post', 'options'], "apiCoreAbogadoGet", "CoreController@apiCoreAbogadoGet");
   Route::match(['post', 'options'], "apiCoreCalendarioSave", "CoreController@apiCoreCalendarioSave");
+  Route::match(['post', 'options'], "apiCoreCrearActividad", "CoreController@apiCoreCrearActividad");
+
+  //  Notificaciones
+
+  Route::match(['post', 'options'], "apiConsultarNotificaciones", "NotificacionesController@apiConsultarNotificaciones");
+  Route::match(['post', 'options'], "apiAprobarNotificacionReunion", "NotificacionesController@apiAprobarNotificacionReunion");
+  Route::match(['post', 'options'], "apiRechazarNotificacionReunion", "NotificacionesController@apiRechazarNotificacionReunion");
+
+  //  Calendario
+
+  Route::match(['post', 'options'], "apiConsultarCalendario", "CalendarioController@apiConsultarCalendario");
+  Route::match(['post', 'options'], "apiAsignarLinkReunion", "CalendarioController@apiAsignarLinkReunion");
   
 });

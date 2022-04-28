@@ -200,7 +200,8 @@ class UsuariosController extends Controller{
                 '',
                 '',
                 '',
-                '1'
+                '1',
+                ''
             )
         ";
 

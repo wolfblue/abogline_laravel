@@ -75,11 +75,20 @@ class CoreController extends Controller{
 
         $sqlString = "
             SELECT
-                abogado
+                casos_usuario.abogado,
+                usuarios.consulta,
+                usuarios.nombres,
+                usuarios.apellidos,
+                usuarios.identificacion,
+                usuarios.tipo_tp,
+                usuarios.tarjeta_licencia,
+                usuarios.direccion
             FROM
-                casos_usuario
+                casos_usuario,
+                usuarios
             WHERE
-                id_caso = '".$idCaso."'
+                casos_usuario.id_caso = '".$idCaso."' AND
+                casos_usuario.abogado = usuarios.usuario
         ";
 
         $sql = DB::select($sqlString);
@@ -100,6 +109,8 @@ class CoreController extends Controller{
         $idCaso = $request->idCaso;
         $fechaDesde = $request->fechaDesde;
         $fechaHasta = $request->fechaHasta;
+        $usuario = $request->usuario;
+        $abogado = $request->abogado;
 
         //  Registrar evento
 
@@ -110,11 +121,111 @@ class CoreController extends Controller{
                 '".$fechaDesde."',
                 '".$fechaHasta."',
                 '1',
-                ''
+                '',
+                '".$usuario."',
+                '".$abogado."',
+                'Asesoría'
             )
         ";
 
         DB::insert($sqlString);
+
+        //  Insertar notificación al abogado
+
+        $idCalendario = "0";
+
+        $sqlString = "
+            SELECT
+                MAX(id) AS id
+            FROM
+                calendario
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $idCalendario = $result->id;
+
+        $abogado = "";
+
+        $sqlString = "
+            SELECT
+                abogado
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado_usuario = 'aceptado' AND
+                estado_abogado = 'aceptado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->abogado;
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$abogado."',
+                '1',
+                'Solicitud de asesoría',
+                'El cliente ha solicitado una asesoría para el caso #".$idCaso." para la siguiente fecha: ".$fechaDesde." - ".$fechaHasta."',
+                '',
+                '',
+                'idCaso',
+                '".$idCalendario."'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    /********************************************************************************** */
+    // ACTIVAR ACTIVIDAD
+    /********************************************************************************** */
+
+    public function apiCoreCrearActividad(Request $request){
+
+        //  Parametros de entrada
+        
+        $idCaso = $request->idCaso;
+        $actividad = $request->actividad;
+        $aprobacion = $request->aprobacion;
+        $usuario = $request->usuario;
+        $actividadDesc = $request->actividadDesc;
+
+        //  Validar aprobación
+
+        if($aprobacion == "0"){
+
+            //  Registrar evento
+
+            $sqlString = "UPDATE casos SET ".$actividad." = 'proceso' WHERE id = '".$idCaso."'";
+            DB::update($sqlString);
+
+        }else{
+
+            //  Crear solicitud de aprobación
+
+            $sqlString = "
+                INSERT INTO solicitudes VALUES (
+                    '0',
+                    '".$usuario."',
+                    'Crear actividad',
+                    '".$actividadDesc."',
+                    '1',
+                    '".$idCaso."',
+                    '0'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
 
     }
 

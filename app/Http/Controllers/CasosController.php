@@ -23,6 +23,7 @@ class CasosController extends Controller{
         $cuentanos = $request->cuentanos;
         $usuario = $request->usuario;
         $id = $request->id;
+        $ciudadProblema = $request->ciudadProblema;
 
         if(!$id){
 
@@ -50,7 +51,8 @@ class CasosController extends Controller{
                     '',
                     '',
                     '',
-                    ''
+                    '',
+                    '".$ciudadProblema."'
                 )
             ";
 
@@ -66,7 +68,8 @@ class CasosController extends Controller{
                     trata_caso = '".$trataCaso."',
                     cual_problema = '".$cualProblema."',
                     proceso = '".$proceso."',
-                    cuentanos = '".$cuentanos."'
+                    cuentanos = '".$cuentanos."',
+                    ciudad_problema = '".$ciudadProblema."'
                 WHERE
                     id = '".$id."'
             ";
@@ -90,6 +93,7 @@ class CasosController extends Controller{
         $cualProblema = $request->cualProblema;
         $id = $request->id;
         $perfil = $request->perfil;
+        $ciudadProblema = $request->ciudadProblema;
 
         //  Condiciones
 
@@ -103,6 +107,9 @@ class CasosController extends Controller{
 
         if($cualProblema)
             $where .= " AND cual_problema = '".$cualProblema."'";
+
+        if($ciudadProblema)
+            $where .= " AND ciudad_problema = '".$ciudadProblema."'";
 
         if($id)
             $where .= " AND id = '".$id."'";
@@ -148,7 +155,8 @@ class CasosController extends Controller{
                 paso10_documentacion,
                 paso11_reunion_presencial,
                 paso12_informacion,
-                usuario
+                usuario,
+                ciudad_problema
             FROM 
                 casos
             WHERE 
