@@ -41,7 +41,7 @@ class ContactenosController extends Controller{
 
         $mail->Subject = "Contactenos";
 
-        $html = "Un usuario desea ponerse en contacto con Abogline, a continuación se envía la información digitada: <br><br>";
+        $html = "Un usuario desea ponerse en contacto con Abogline, a continuacion se envia la informacion digitada: <br><br>";
 
         $html.= "<p><b>Nombres: </b>".$nombres."</p>";
         $html.= "<p><b>Apellidos: </b>".$apellidos."</p>";
