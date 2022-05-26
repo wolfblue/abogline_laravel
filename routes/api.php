@@ -81,5 +81,8 @@ Route::group(['middleware' => ['cors']], function () {
 
   Route::match(['post', 'options'], "apiConsultarCalendario", "CalendarioController@apiConsultarCalendario");
   Route::match(['post', 'options'], "apiAsignarLinkReunion", "CalendarioController@apiAsignarLinkReunion");
+
+  //  CONTÁCTENOS
+  Route::match(['post', 'options'], "apiContactenosEnviarFormulario", "ContactenosController@apiContactenosEnviarFormulario");
   
 });
