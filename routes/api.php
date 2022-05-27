@@ -84,5 +84,8 @@ Route::group(['middleware' => ['cors']], function () {
 
   //  CONTÁCTENOS
   Route::match(['post', 'options'], "apiContactenosEnviarFormulario", "ContactenosController@apiContactenosEnviarFormulario");
+
+  //  LOGIN
+  Route::match(['post', 'options'], "apiLoginRecordarPassword", "LoginController@apiLoginRecordarPassword");
   
 });

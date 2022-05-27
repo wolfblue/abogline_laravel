@@ -48,6 +48,18 @@ class UsuariosController extends Controller{
         
         $usuario = $request->usuario;
         $password = $request->password;
+        $recordar = $request->recordar;
+
+        //  Actualizar recordar contraseña
+
+        DB::update("
+            UPDATE
+                usuarios
+            SET
+                recordar = ".$recordar."
+            WHERE
+                usuario = '".$usuario."'
+        ");
 
         //  Consultar información del usuario
 
@@ -201,7 +213,8 @@ class UsuariosController extends Controller{
                 '',
                 '',
                 '1',
-                ''
+                '',
+                0
             )
         ";
 
