@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class UsuariosController extends Controller{
 
@@ -161,78 +163,132 @@ class UsuariosController extends Controller{
 
     public function apiUsuariosInsertUser(Request $request){
 
-        //  Parametros de entrada
+        try{
 
-        $usuario = $request->usuario;
-        $email = $request->email;
-        $password = $request->password;
-        $perfil = $request->perfil;
+            //  Parametros de entrada
 
-        //  Insertar usuario
+            $usuario = $request->usuario;
+            $email = $request->email;
+            $password = $request->password;
+            $perfil = $request->perfil;
 
-        $sqlString = "
-            INSERT INTO usuarios VALUES (
-                '".$usuario."',
-                '".$email."',
-                '".$password."',
-                '".$perfil."',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                now(),
-                'true',
-                'true',
-                'false',
-                'false',
-                'false',
-                '',
-                '',
-                '',
-                'false',
-                'false',
-                'false',
-                'false',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '1',
-                '',
-                0
-            )
-        ";
+            //  Insertar usuario
 
-        DB::insert($sqlString);
+            $sqlString = "
+                INSERT INTO usuarios VALUES (
+                    '".$usuario."',
+                    '".$email."',
+                    '".$password."',
+                    '".$perfil."',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    now(),
+                    'true',
+                    'false',
+                    'false',
+                    'false',
+                    'false',
+                    '',
+                    '',
+                    '',
+                    'false',
+                    'false',
+                    'false',
+                    'false',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '',
+                    '1',
+                    '',
+                    0
+                )
+            ";
 
-        //  Registrar titulo asignar para abogados
+            DB::insert($sqlString);
 
-        $sqlString = "
-            INSERT INTO titulos_hv_usuario values (
-                '0',
-                '".$usuario."',
-                '',
-                '',
-                ''
-            )
-        ";
+            //  Registrar titulo asignar para abogados
 
-        DB::insert($sqlString);
+            $sqlString = "
+                INSERT INTO titulos_hv_usuario values (
+                    '0',
+                    '".$usuario."',
+                    '',
+                    '',
+                    ''
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            //  Enviar correo electronico
+
+            $mail = new PHPMailer(true);
+
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = 'smtp.hostinger.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'administrador@abogline.com';
+            $mail->Password = '4riK5YuDZy*E$7h';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+            $mail->addAddress($email);
+
+            $mail->isHTML(true);
+            $mail->CharSet = 'UTF-8';
+
+            $mail->Subject = "Bienvenido a Abogline";
+
+            $html = "Usted se ha registrado correctamente como ".$perfil."<br><br>";
+
+            $html.= "<p><b>Usuario: </b>".$usuario."</p>";
+            $html.= "<p><b>E-mail: </b>".$email."</p>";
+
+            $mail->Body = $html;
+
+            $mail->send();
+
+            //  Notificación de bienvenida al usuario
+
+            $sqlString = "
+                INSERT INTO notificaciones values (
+                    '0',
+                    '".$usuario."',
+                    '1',
+                    'Bienvenido a Abogline',
+                    'Usted se ha registrado correctamente como ".$perfil."',
+                    '',
+                    '',
+                    '',
+                    '0'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }catch (Exception $e){
+            return $e->getMessage();
+        }
         
     }
 
@@ -261,6 +317,7 @@ class UsuariosController extends Controller{
         $direccion = $request->direccion;
         $municipio = $request->municipio;
         $nacimiento = $request->nacimiento;
+        $perfil = $request->perfil;
 
         //  Actualizar usuario
 
@@ -287,6 +344,53 @@ class UsuariosController extends Controller{
         ";
 
         DB::update($sqlString);
+
+        //  Validar completa tu perfil
+
+        if(
+            $perfil == "cliente" &&
+            $nombres &&
+            $apellidos &&
+            $tipoIdentificacion &&
+            $identificacion &&
+            $genero &&
+            $telefonoContacto &&
+            $ciudad &&
+            $direccion &&
+            $municipio &&
+            $nacimiento
+        ){
+
+            $sqlString = "
+                UPDATE
+                    usuarios
+                SET
+                    completa_perfil = 'true'
+                WHERE
+                    usuario = '".$usuario."'
+            ";
+
+            DB::update($sqlString);
+
+            //  Notificar al cliente el estado completado del perfil
+
+            $sqlString = "
+                INSERT INTO notificaciones values (
+                    '0',
+                    '".$usuario."',
+                    '1',
+                    'Perfil completado',
+                    'Felicitaciones, ha completado su perfil, ahora puede registrar su caso.',
+                    '',
+                    '',
+                    '',
+                    '0'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
         
     }
 

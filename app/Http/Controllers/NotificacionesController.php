@@ -113,6 +113,32 @@ class NotificacionesController extends Controller{
 
         DB::update($sqlString);
 
-    }    
+    }
+
+    //  ELIMINAR NOTIFICACIÓN
+
+    public function apiEliminarNotificacion(Request $request){
+
+        try{
+
+            //  Parametros de entrada
+            $id = $request->id;
+
+            //  Eliminar notificación
+
+            $sqlString = "
+                DELETE FROM
+                    notificaciones
+                WHERE
+                    id = '".$id."'
+            ";
+
+            DB::delete($sqlString);
+
+        }catch(Exception $e){
+            return $e->getMessage();
+        }
+
+    }
 
 }

@@ -58,6 +58,38 @@ class CasosController extends Controller{
 
             DB::insert($sqlString);
 
+            //  Notificar al usuario el registro del caso
+
+            $sqlString = "
+                SELECT
+                    MAX(id) AS id
+                FROM
+                    casos
+                WHERE
+                    usuario = '".$usuario."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $id = $result->id;
+
+            $sqlString = "
+                INSERT INTO notificaciones values (
+                    '0',
+                    '".$usuario."',
+                    '1',
+                    'Caso registrado',
+                    'Usted ha registrado un caso, el número del caso generado es ".$id."',
+                    '',
+                    '',
+                    '',
+                    '0'
+                )
+            ";
+
+            DB::insert($sqlString);
+
         }else{
 
             //  Actualizar caso

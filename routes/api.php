@@ -76,6 +76,7 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiConsultarNotificaciones", "NotificacionesController@apiConsultarNotificaciones");
   Route::match(['post', 'options'], "apiAprobarNotificacionReunion", "NotificacionesController@apiAprobarNotificacionReunion");
   Route::match(['post', 'options'], "apiRechazarNotificacionReunion", "NotificacionesController@apiRechazarNotificacionReunion");
+  Route::match(['post', 'options'], "apiEliminarNotificacion", "NotificacionesController@apiEliminarNotificacion");
 
   //  Calendario
 
@@ -87,5 +88,13 @@ Route::group(['middleware' => ['cors']], function () {
 
   //  LOGIN
   Route::match(['post', 'options'], "apiLoginRecordarPassword", "LoginController@apiLoginRecordarPassword");
+
+  //  HOME
+
+  Route::match(['post', 'options'], "apiHomeEnviarContacto", "HomeController@apiHomeEnviarContacto");
+  Route::match(['post', 'options'], "apiHomeEnviarChat", "HomeController@apiHomeEnviarChat");
+
+  //  REGISTRAR CASO
+  Route::match(['post', 'options'], "apiRegistrarCasoConsultarUsuario", "RegistrarCasoController@apiRegistrarCasoConsultarUsuario");
   
 });
