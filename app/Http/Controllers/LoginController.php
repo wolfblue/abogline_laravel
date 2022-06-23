@@ -40,6 +40,8 @@ class LoginController extends Controller{
 
         //  Enviar correo electronico
 
+        $md5 = md5($usuario);
+
         if($password){
 
             $mail = new PHPMailer(true);
@@ -61,10 +63,9 @@ class LoginController extends Controller{
 
             $mail->Subject = "Abogline: Recordar contraseña";
 
-            $html = "Abogline le recuerda sus datos de acceso: <br><br>";
+            $html = "A continuación se envía link para restablecer su contraseña en Abogline: <br><br>";
 
-            $html.= "<p><b>Usuario: </b>".$usuario."</p>";
-            $html.= "<p><b>Contraseña: </b>".$password."</p>";
+            $html.= "<a href='".\Config::get('values.front')."links?tipo=password&usuario=".$md5."'>".\Config::get('values.front')."links?tipo=password&usuario=".$md5."</a>";
 
             $mail->Body = $html;
 

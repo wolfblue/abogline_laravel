@@ -176,7 +176,9 @@ class CoreController extends Controller{
                 '',
                 '',
                 'idCaso',
-                '".$idCalendario."'
+                '".$idCalendario."',
+                '".$idCaso."',
+                '2'
             )
         ";
 

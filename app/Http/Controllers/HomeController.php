@@ -103,4 +103,30 @@ class HomeController extends Controller{
 
     }
 
+    //  CONSULTAR NOTIFICACIONES
+
+    public function apiHomeConsultarNotificaciones(Request $request){
+
+        //  Variables iniciales
+        $usuario = $request->usuario;
+
+        //  Consultar notificaciones
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                notificaciones
+            WHERE
+                estado = '1' AND
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar notificaciones
+        return response()->json($sql);
+
+    }
+
 }

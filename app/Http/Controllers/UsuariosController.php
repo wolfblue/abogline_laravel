@@ -30,7 +30,8 @@ class UsuariosController extends Controller{
                 (
                     usuario = '".$usuario."' OR
                     email = '".$usuario."'
-                )
+                ) AND
+                estado in ('1','2')
         ";
 
         $sql = DB::select($sqlString);
@@ -54,14 +55,18 @@ class UsuariosController extends Controller{
 
         //  Actualizar recordar contraseña
 
-        DB::update("
-            UPDATE
-                usuarios
-            SET
-                recordar = ".$recordar."
-            WHERE
-                usuario = '".$usuario."'
-        ");
+        if($recordar){
+
+            DB::update("
+                UPDATE
+                    usuarios
+                SET
+                    recordar = ".$recordar."
+                WHERE
+                    usuario = '".$usuario."'
+            ");
+
+        }
 
         //  Consultar información del usuario
 
@@ -141,13 +146,35 @@ class UsuariosController extends Controller{
 
     public function apiUsuariosGetAbogados(Request $request){
 
+        //  Parametro de entrada
+        $usuario = $request->usuario;
+
+        //  Consultar abogados
+
         $sqlString = "
             SELECT
-                *
+                *,
+                FORMAT(consulta, 0) AS consulta_format
             FROM
                 usuarios
             WHERE
-                perfil = 'abogado'
+                perfil = 'abogado' AND
+                estado = '2' AND
+                usuario NOT IN (
+                    SELECT
+                        abogado
+                    FROM
+                        casos_usuario
+                    WHERE
+                        id_caso IN (
+                            SELECT
+                                id
+                            FROM
+                                casos
+                            WHERE
+                                usuario = '".$usuario."'
+                        )
+                )
         ";
 
         $sql = DB::select($sqlString);
@@ -173,6 +200,8 @@ class UsuariosController extends Controller{
             $perfil = $request->perfil;
 
             //  Insertar usuario
+
+            $md5 = md5($usuario);
 
             $sqlString = "
                 INSERT INTO usuarios VALUES (
@@ -216,9 +245,10 @@ class UsuariosController extends Controller{
                     '',
                     '',
                     '',
-                    '1',
+                    '0',
                     '',
-                    0
+                    0,
+                    '".$md5."'
                 )
             ";
 
@@ -262,7 +292,8 @@ class UsuariosController extends Controller{
             $html = "Usted se ha registrado correctamente como ".$perfil."<br><br>";
 
             $html.= "<p><b>Usuario: </b>".$usuario."</p>";
-            $html.= "<p><b>E-mail: </b>".$email."</p>";
+            $html.= "<p><b>E-mail: </b>".$email."</p><br><br>";
+            $html.= "Por favor confirmar su cuenta en el siguiente link: ".\Config::get('values.front')."links?tipo=aprobacion&usuario=".$md5;
 
             $mail->Body = $html;
 
@@ -280,7 +311,9 @@ class UsuariosController extends Controller{
                     '',
                     '',
                     '',
-                    '0'
+                    '0',
+                    '0',
+                    '1'
                 )
             ";
 
@@ -348,7 +381,6 @@ class UsuariosController extends Controller{
         //  Validar completa tu perfil
 
         if(
-            $perfil == "cliente" &&
             $nombres &&
             $apellidos &&
             $tipoIdentificacion &&
@@ -384,11 +416,54 @@ class UsuariosController extends Controller{
                     '',
                     '',
                     '',
-                    '0'
+                    '0',
+                    '0',
+                    '1'
                 )
             ";
 
             DB::insert($sqlString);
+
+            //  Enviar correo electrónico
+
+            $sqlString = "
+                SELECT
+                    email
+                FROM
+                    usuarios
+                WHERE
+                    usuario = '".$usuario."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $email = $result->email;
+
+            $mail = new PHPMailer(true);
+
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = 'smtp.hostinger.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'administrador@abogline.com';
+            $mail->Password = '4riK5YuDZy*E$7h';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+            $mail->addAddress($email);
+
+            $mail->isHTML(true);
+            $mail->CharSet = 'UTF-8';
+
+            $mail->Subject = "Abogline: Perfil completado";
+
+            $html = "Felicitaciones, ha completado su perfil, ahora puede registrar su primer caso.";
+
+            $mail->Body = $html;
+
+            $mail->send();
 
         }
         
@@ -457,6 +532,111 @@ class UsuariosController extends Controller{
 
         $sqlString = "UPDATE usuarios SET ".$field." = '".$value."' WHERE usuario = '".$usuario."'";
         DB::update($sqlString);
+
+        //  Validar estado hoja de vida
+
+        $estado = 0;
+
+        $sqlString = "
+            SELECT
+                universidad_egreso,
+                titulo_profesional,
+                presentacion,
+                tipo_tp,
+                tarjeta_licencia,
+                experiencia,
+                experiencia_tiempo,
+                investigacion,
+                ramas,
+                consulta
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result){
+
+            $universidadEgreso = $result->universidad_egreso;
+            $tituloProfesional = $result->titulo_profesional;
+            $presentacion = $result->presentacion;
+            $tipoTp = $result->tipo_tp;
+            $tarjetaLicencia = $result->tarjeta_licencia;
+            $experiencia = $result->experiencia;
+            $experienciaTiempo = $result->experiencia_tiempo;
+            $investigacion = $result->investigacion;
+            $ramas = $result->ramas;
+            $consulta = $result->consulta;
+
+            if(!$universidadEgreso)
+                $estado = 1;
+
+            if(!$tituloProfesional)
+                $estado = 1;
+
+            if(!$presentacion)
+                $estado = 1;
+
+            if(!$tipoTp)
+                $estado = 1;
+
+            if(!$tarjetaLicencia)
+                $estado = 1;
+
+            if(!$experiencia)
+                $estado = 1;
+
+            if(!$experienciaTiempo)
+                $estado = 1;
+
+            if(!$investigacion)
+                $estado = 1;
+
+            if(!$ramas)
+                $estado = 1;
+
+            if(!$consulta)
+                $estado = 1;
+
+        }
+
+        $total = "0";
+
+        $sqlString = "
+            SELECT
+                count(*) AS total
+            FROM
+                usuarios_documentos
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $total = $result->total;
+
+        if($total < 6)
+            $estado = 1;
+
+        //  Actualizar estado
+
+        if($estado == 0){
+
+            $sqlString = "
+                UPDATE
+                    usuarios
+                SET
+                    hoja_vida = 'true'
+                WHERE
+                    usuario = '".$usuario."'
+            ";
+
+            DB::update($sqlString);
+
+        }
 
     }
 
@@ -549,6 +729,111 @@ class UsuariosController extends Controller{
         ";
 
         DB::insert($sqlString);
+
+        //  Validar estado hoja de vida
+
+        $estado = 0;
+
+        $sqlString = "
+            SELECT
+                universidad_egreso,
+                titulo_profesional,
+                presentacion,
+                tipo_tp,
+                tarjeta_licencia,
+                experiencia,
+                experiencia_tiempo,
+                investigacion,
+                ramas,
+                consulta
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result){
+
+            $universidadEgreso = $result->universidad_egreso;
+            $tituloProfesional = $result->titulo_profesional;
+            $presentacion = $result->presentacion;
+            $tipoTp = $result->tipo_tp;
+            $tarjetaLicencia = $result->tarjeta_licencia;
+            $experiencia = $result->experiencia;
+            $experienciaTiempo = $result->experiencia_tiempo;
+            $investigacion = $result->investigacion;
+            $ramas = $result->ramas;
+            $consulta = $result->consulta;
+
+            if(!$universidadEgreso)
+                $estado = 1;
+
+            if(!$tituloProfesional)
+                $estado = 1;
+
+            if(!$presentacion)
+                $estado = 1;
+
+            if(!$tipoTp)
+                $estado = 1;
+
+            if(!$tarjetaLicencia)
+                $estado = 1;
+
+            if(!$experiencia)
+                $estado = 1;
+
+            if(!$experienciaTiempo)
+                $estado = 1;
+
+            if(!$investigacion)
+                $estado = 1;
+
+            if(!$ramas)
+                $estado = 1;
+
+            if(!$consulta)
+                $estado = 1;
+
+        }
+
+        $total = "0";
+
+        $sqlString = "
+            SELECT
+                count(*) AS total
+            FROM
+                usuarios_documentos
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $total = $result->total;
+
+        if($total < 6)
+            $estado = 1;
+
+        //  Actualizar estado
+
+        if($estado == 0){
+
+            $sqlString = "
+                UPDATE
+                    usuarios
+                SET
+                    hoja_vida = 'true'
+                WHERE
+                    usuario = '".$usuario."'
+            ";
+
+            DB::update($sqlString);
+
+        }
 
     }
 

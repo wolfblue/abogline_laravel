@@ -71,12 +71,13 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiCoreCalendarioSave", "CoreController@apiCoreCalendarioSave");
   Route::match(['post', 'options'], "apiCoreCrearActividad", "CoreController@apiCoreCrearActividad");
 
-  //  Notificaciones
+  //  NOTIFICACIONES
 
   Route::match(['post', 'options'], "apiConsultarNotificaciones", "NotificacionesController@apiConsultarNotificaciones");
   Route::match(['post', 'options'], "apiAprobarNotificacionReunion", "NotificacionesController@apiAprobarNotificacionReunion");
   Route::match(['post', 'options'], "apiRechazarNotificacionReunion", "NotificacionesController@apiRechazarNotificacionReunion");
   Route::match(['post', 'options'], "apiEliminarNotificacion", "NotificacionesController@apiEliminarNotificacion");
+  Route::match(['post', 'options'], "apiNotificacionesAprobar", "NotificacionesController@apiNotificacionesAprobar");
 
   //  Calendario
 
@@ -90,11 +91,16 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiLoginRecordarPassword", "LoginController@apiLoginRecordarPassword");
 
   //  HOME
-
+  
   Route::match(['post', 'options'], "apiHomeEnviarContacto", "HomeController@apiHomeEnviarContacto");
   Route::match(['post', 'options'], "apiHomeEnviarChat", "HomeController@apiHomeEnviarChat");
+  Route::match(['post', 'options'], "apiHomeConsultarNotificaciones", "HomeController@apiHomeConsultarNotificaciones");
 
   //  REGISTRAR CASO
   Route::match(['post', 'options'], "apiRegistrarCasoConsultarUsuario", "RegistrarCasoController@apiRegistrarCasoConsultarUsuario");
+
+  //  LINKS
+  Route::match(['post', 'options'], "apiLinksAprobarUsuario", "LinksController@apiLinksAprobarUsuario");
+  Route::match(['post', 'options'], "apiLinksRestablecerPassword", "LinksController@apiLinksRestablecerPassword");
   
 });

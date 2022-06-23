@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class CasosController extends Controller{
 
@@ -84,11 +86,61 @@ class CasosController extends Controller{
                     '',
                     '',
                     '',
-                    '0'
+                    '0',
+                    '".$id."',
+                    '1'
                 )
             ";
 
             DB::insert($sqlString);
+
+            //  Enviar correo electrónico
+
+            $sqlString = "
+                SELECT
+                    email
+                FROM
+                    usuarios
+                WHERE
+                    usuario = '".$usuario."'
+            ";
+
+            $sql = DB::select($sqlString);
+
+            foreach($sql as $result)
+                $email = $result->email;
+
+            $mail = new PHPMailer(true);
+
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = 'smtp.hostinger.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'administrador@abogline.com';
+            $mail->Password = '4riK5YuDZy*E$7h';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+            $mail->addAddress($email);
+
+            $mail->isHTML(true);
+            $mail->CharSet = 'UTF-8';
+
+            $mail->Subject = "Abogline: Caso registrado";
+
+            $html = "Usted ha registrado correctamente un caso con la siguiente información:<br><br>";
+
+            $html.= "<p><b>Id del caso: </b>".$id."</p>";
+            $html.= "<p><b>Problema: </b>".$problemas."</p>";
+            $html.= "<p><b>Tipo: </b>".$trataCaso."</p>";
+            $html.= "<p><b>Caso: </b>".$cualProblema."</p>";
+            $html.= "<p><b>Descripción: </b>".$proceso."</p>";
+            $html.= "<p><b>Observación: </b>".$cuentanos."</p>";
+
+            $mail->Body = $html;
+
+            $mail->send();
 
         }else{
 
@@ -314,6 +366,67 @@ class CasosController extends Controller{
             DB::update($sqlString);
 
         }
+
+        //  Notificar al abogado
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$abogado."',
+                '1',
+                'Solicitud de consulta para un caso',
+                'Un cliente quiere ponerse en contacto contigo para una consulta del caso #".$idCaso."',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '2'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Enviar correo electrónico
+
+        $sqlString = "
+            SELECT
+                email
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$abogado."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $email = $result->email;
+
+        $mail = new PHPMailer(true);
+
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'administrador@abogline.com';
+        $mail->Password = '4riK5YuDZy*E$7h';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+
+        $mail->Subject = "Abogline: Solicitud de consulta para un caso";
+
+        $html = "Un cliente quiere ponerse en contacto contigo para una consulta del caso #".$idCaso;
+
+        $mail->Body = $html;
+
+        $mail->send();
 
     }
 
