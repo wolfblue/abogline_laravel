@@ -159,22 +159,7 @@ class UsuariosController extends Controller{
                 usuarios
             WHERE
                 perfil = 'abogado' AND
-                estado = '2' AND
-                usuario NOT IN (
-                    SELECT
-                        abogado
-                    FROM
-                        casos_usuario
-                    WHERE
-                        id_caso IN (
-                            SELECT
-                                id
-                            FROM
-                                casos
-                            WHERE
-                                usuario = '".$usuario."'
-                        )
-                )
+                estado = '2'
         ";
 
         $sql = DB::select($sqlString);

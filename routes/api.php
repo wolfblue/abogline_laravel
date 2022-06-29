@@ -63,13 +63,14 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiUsuariosGetDocumentos", "UsuariosController@apiUsuariosGetDocumentos");
   Route::match(['post', 'options'], "apiUsuariosGetAbogados", "UsuariosController@apiUsuariosGetAbogados");
 
-  //  Core
+  //  CORE
 
   Route::match(['post', 'options'], "apiCoreChatSave", "CoreController@apiCoreChatSave");
   Route::match(['post', 'options'], "apiCoreChatGet", "CoreController@apiCoreChatGet");
   Route::match(['post', 'options'], "apiCoreAbogadoGet", "CoreController@apiCoreAbogadoGet");
   Route::match(['post', 'options'], "apiCoreCalendarioSave", "CoreController@apiCoreCalendarioSave");
   Route::match(['post', 'options'], "apiCoreCrearActividad", "CoreController@apiCoreCrearActividad");
+  Route::match(['post', 'options'], "apiCoreConsultarActividades", "CoreController@apiCoreConsultarActividades");
 
   //  NOTIFICACIONES
 
@@ -100,7 +101,11 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiRegistrarCasoConsultarUsuario", "RegistrarCasoController@apiRegistrarCasoConsultarUsuario");
 
   //  LINKS
+  
   Route::match(['post', 'options'], "apiLinksAprobarUsuario", "LinksController@apiLinksAprobarUsuario");
   Route::match(['post', 'options'], "apiLinksRestablecerPassword", "LinksController@apiLinksRestablecerPassword");
+
+  //  CONSULTAR ABOGADOS
+  Route::match(['post', 'options'], "apiConsultarAbogadosEligemeValidar", "ConsultarAbogadosController@apiConsultarAbogadosEligemeValidar");
   
 });

@@ -76,7 +76,7 @@ class CoreController extends Controller{
         $sqlString = "
             SELECT
                 casos_usuario.abogado,
-                usuarios.consulta,
+                FORMAT(usuarios.consulta, 0) AS consulta,
                 usuarios.nombres,
                 usuarios.apellidos,
                 usuarios.identificacion,
@@ -228,6 +228,34 @@ class CoreController extends Controller{
             DB::insert($sqlString);
 
         }
+
+    }
+
+    //  CONSULTAR ACTIVIDADES
+
+    public function apiCoreConsultarActividades(Request $request){
+
+        //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $idCaso = $request->idCaso;
+
+        //  Consultar actividades del usuario
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                actividades
+            WHERE
+                usuario = '".$usuario."' AND
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar casos del usuario
+        return response()->json($sql);       
 
     }
 

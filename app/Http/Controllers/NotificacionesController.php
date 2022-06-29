@@ -196,6 +196,19 @@ class NotificacionesController extends Controller{
 
         DB::update($sqlString);
 
+        //  Actualizar estado del caso
+
+        $sqlString = "
+            UPDATE
+                casos
+            SET
+                estado = '2'
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
         //  Enviar notificación al cliente
 
         $sqlString = "
@@ -268,6 +281,19 @@ class NotificacionesController extends Controller{
         $mail->Body = $html;
 
         $mail->send();
+
+        //  Registrar actividad de pago de asesoría para el cliente
+
+        $sqlString = "
+            INSERT INTO actividades VALUES (
+                '0',
+                '1',
+                '".$cliente."',
+                '".$idCaso."'
+            )
+        ";
+
+        DB::insert($sqlString);
 
     }
 

@@ -202,7 +202,7 @@ class CasosController extends Controller{
 
         if($perfil == "abogado"){
 
-            /*$where .= " AND id IN (
+            $where .= " AND id IN (
                 SELECT
                     id_caso
                 FROM
@@ -211,7 +211,7 @@ class CasosController extends Controller{
                     abogado = '".$usuario."' AND
                     estado_usuario = 'aceptado' AND
                     estado_abogado = 'aceptado'
-            )";*/
+            )";
 
         }
 
@@ -223,10 +223,7 @@ class CasosController extends Controller{
                 proceso,
                 cuentanos,
                 cual_problema,
-                (
-                    CASE WHEN estado = '1' then 'Registrado' ELSE '' END
-                ) AS estado,
-                estado AS estado_original,
+                estado,
                 paso1_pago_asesoria,
                 paso2_asesoria,
                 paso3_decision_continuidad,
@@ -240,7 +237,32 @@ class CasosController extends Controller{
                 paso11_reunion_presencial,
                 paso12_informacion,
                 usuario,
-                ciudad_problema
+                ciudad_problema,
+                (
+                        SELECT
+                            concat(nombres,' ',apellidos)
+                        FROM
+                            usuarios
+                        WHERE
+                            usuario IN (
+                                SELECT
+                                    abogado
+                                FROM
+                                    casos_usuario
+                                WHERE
+                                    id_caso = casos.id AND
+                                    estado_usuario = 'aceptado' AND
+                                    estado_abogado = 'aceptado'
+                            ) 
+                ) AS abogado,
+                (
+                    SELECT
+                        concat(nombres,' ',apellidos)
+                    FROM
+                        usuarios
+                    WHERE
+                        usuario = casos.usuario
+            ) AS cliente
             FROM 
                 casos
             WHERE 
