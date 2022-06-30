@@ -71,6 +71,8 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiCoreCalendarioSave", "CoreController@apiCoreCalendarioSave");
   Route::match(['post', 'options'], "apiCoreCrearActividad", "CoreController@apiCoreCrearActividad");
   Route::match(['post', 'options'], "apiCoreConsultarActividades", "CoreController@apiCoreConsultarActividades");
+  Route::match(['post', 'options'], "apiCoreGenerarTokenPagos", "CoreController@apiCoreGenerarTokenPagos");
+  Route::match(['post', 'options'], "apiCoreGenerarLinkPagos", "CoreController@apiCoreGenerarLinkPagos");
 
   //  NOTIFICACIONES
 
