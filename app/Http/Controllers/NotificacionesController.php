@@ -148,6 +148,7 @@ class NotificacionesController extends Controller{
         $tipoNotificacion = $request->tipoNotificacion;
         $idCaso = $request->idCaso;
         $abogado = $request->abogado;
+        $idCalendario = $request->idCalendario;
 
         //  Validar tipo de notifiación
 
@@ -157,6 +158,14 @@ class NotificacionesController extends Controller{
 
                 //  Aprobar solicitud de consulta desde el abogado al cliente
                 $this->aprobarSolicitudConsultaCliente($idCaso,$abogado);
+
+            }
+            break;
+
+            case "3":{
+
+                //  Aprobar solicitud de asesoría
+                $this->aprobarSolicitudAsesoria($idCaso,$abogado,$idCalendario);
 
             }
             break;
@@ -289,7 +298,55 @@ class NotificacionesController extends Controller{
                 '0',
                 '1',
                 '".$cliente."',
-                '".$idCaso."'
+                '".$idCaso."',
+                now()
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    //  APROBAR SOLICITUD DE ASESORÍA
+
+    public function aprobarSolicitudAsesoria($idCaso,$abogado,$idCalendario){
+
+        //  Aprobar calendario
+
+        $sqlString = "
+            UPDATE
+                calendario
+            SET
+                estado = '2'
+            WHERE
+                id = '".$idCalendario."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Crear actividad desición de continuidad
+
+        $sqlString = "
+            SELECT
+                usuario
+            FROM
+                casos
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $cliente = $result->usuario;
+
+        $sqlString = "
+            INSERT INTO actividades values (
+                '0',
+                '3',
+                '".$cliente."',
+                '".$idCaso."',
+                now()
             )
         ";
 

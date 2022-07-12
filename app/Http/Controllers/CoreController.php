@@ -178,7 +178,7 @@ class CoreController extends Controller{
                 'idCaso',
                 '".$idCalendario."',
                 '".$idCaso."',
-                '2'
+                '3'
             )
         ";
 
@@ -244,7 +244,8 @@ class CoreController extends Controller{
 
         $sqlString = "
             SELECT
-                *
+                *,
+                DATE_FORMAT(date, '%b %d/%Y') AS date_format
             FROM
                 actividades
             WHERE
@@ -328,6 +329,139 @@ class CoreController extends Controller{
         $response = curl_exec($curl);
         
         return response()->json($response);
+
+    }
+
+    //  FINALIZAR ACTIVIDAD
+
+    public function apiCoreFinalizarActividad(Request $request){
+
+        //  Parametros de entrada
+
+        $idActividad = $request->idActividad;
+        $idActividadCrear = $request->idActividadCrear;
+        $cliente = $request->cliente;
+        $abogado = $request->abogado;
+        $idCaso = $request->idCaso;
+
+        //  Finalizar actividad
+        DB::delete("DELETE FROM actividades WHERE id = '".$idActividad."'");
+
+        //  Crear actividad
+
+        if($idActividadCrear){
+
+            $sqlString = "
+                INSERT INTO actividades values (
+                    '0',
+                    '".$idActividadCrear."',
+                    '".$cliente."',
+                    '".$idCaso."',
+                    now()
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            $sqlString = "
+                INSERT INTO actividades values (
+                    '0',
+                    '".$idActividadCrear."',
+                    '".$abogado."',
+                    '".$idCaso."',
+                    now()
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
+
+    }
+
+    //  FINALIZAR CASO
+
+    public function apiCoreFinalizarCaso(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Finalizar caso
+
+        $sqlString = "
+            UPDATE
+                casos
+            SET
+                estado = '0'
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+    }
+
+    //  DESICIÓN CONTINUIDAD SI
+
+    public function apiCoreContinuarCaso(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $cliente = $request->cliente;
+        $abogado = $request->abogado;
+
+        //  Actualizar estado del caso
+
+        $sqlString = "
+            UPDATE
+                casos
+            SET
+                estado = '3'
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Eliminar actividad desición de continuidad
+
+        $sqlString = "
+            DELETE FROM 
+                actividades
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        DB::delete($sqlString);
+
+        //  Insertar actividad contratación al cliente
+
+        $sqlString = "
+            INSERT INTO actividades VALUES (
+                '0',
+                '4',
+                '".$cliente."',
+                '".$idCaso."',
+                now()
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Insertar actividad contratación al abogado
+
+        $sqlString = "
+            INSERT INTO actividades VALUES (
+                '0',
+                '4',
+                '".$abogado."',
+                '".$idCaso."',
+                now()
+            )
+        ";
+
+        DB::insert($sqlString);
 
     }
 
