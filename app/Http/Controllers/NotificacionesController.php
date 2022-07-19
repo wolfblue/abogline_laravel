@@ -28,10 +28,23 @@ class NotificacionesController extends Controller{
                 usuario = '".$usuario."' AND
                 estado = '1'
             ORDER BY
-                id
+                id DESC
         ";
 
         $sql = DB::select($sqlString);
+
+        //  Marcar notificaciones informativas como leídas
+
+        $sqlString = "
+            UPDATE
+                notificaciones
+            SET
+                leido = '2'
+            WHERE
+                tipo_notificacion = '1'
+        ";
+
+        DB::update($sqlString);
 
         //  Retornar información del usuario
         return response()->json($sql);
@@ -258,6 +271,7 @@ class NotificacionesController extends Controller{
                 '',
                 '0',
                 '".$idCaso."',
+                '1',
                 '1'
             )
         ";
@@ -299,7 +313,8 @@ class NotificacionesController extends Controller{
                 '1',
                 '".$cliente."',
                 '".$idCaso."',
-                now()
+                now(),
+                '1'
             )
         ";
 
@@ -346,7 +361,8 @@ class NotificacionesController extends Controller{
                 '3',
                 '".$cliente."',
                 '".$idCaso."',
-                now()
+                now(),
+                '1'
             )
         ";
 

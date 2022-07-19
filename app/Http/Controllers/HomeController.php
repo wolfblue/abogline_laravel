@@ -119,7 +119,8 @@ class HomeController extends Controller{
                 notificaciones
             WHERE
                 estado = '1' AND
-                usuario = '".$usuario."'
+                usuario = '".$usuario."' AND
+                leido = '1'
         ";
 
         $sql = DB::select($sqlString);

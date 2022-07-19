@@ -88,6 +88,7 @@ class CasosController extends Controller{
                     '',
                     '0',
                     '".$id."',
+                    '1',
                     '1'
                 )
             ";
@@ -403,7 +404,8 @@ class CasosController extends Controller{
                 '',
                 '0',
                 '".$idCaso."',
-                '2'
+                '2',
+                '1'
             )
         ";
 

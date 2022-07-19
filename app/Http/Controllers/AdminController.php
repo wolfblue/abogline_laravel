@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class AdminController extends Controller{
 
@@ -321,7 +323,16 @@ class AdminController extends Controller{
 
         //  Consultar usuarios
 
-        $sqlString = "SELECT * FROM usuarios ORDER BY usuario";
+        $sqlString = "
+            SELECT 
+                *,
+                FORMAT(consulta, 0) AS consulta_format
+            FROM 
+                usuarios 
+            ORDER BY 
+                usuario
+        ";
+
         $sql = DB::select($sqlString);
 
         //  Retornar titulos
@@ -357,7 +368,7 @@ class AdminController extends Controller{
         //  Parametros de entrada
         $usuario = $request->usuario;
 
-        //  Consultar usuarios
+        //  Aprobar abogado
 
         $sqlString = "
             UPDATE 
@@ -367,7 +378,70 @@ class AdminController extends Controller{
             WHERE
                 usuario = '".$usuario."'
         ";
+
         DB::update($sqlString);
+
+        //  Enviar correo electronico
+
+        $sqlString = "
+            SELECT
+                email
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $email = $result->email;
+
+        $mail = new PHPMailer(true);
+
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'administrador@abogline.com';
+        $mail->Password = '4riK5YuDZy*E$7h';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+
+        $mail->Subject = "Abogline: Has sido aprobado, ahora puedes usar nuestros servicios";
+
+        $html = "Se ha verificado la información y ha sido aprobado, ahora puede usar de nuestros servicios de Abogline";
+
+        $mail->Body = $html;
+
+        $mail->send();
+
+        //  Notificación de bienvenida al usuario
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$usuario."',
+                '1',
+                'Has sido aprobado, ahora puedes usar nuestros servicios',
+                'Se ha verificado la información y ha sido aprobado, ahora puede usar de nuestros servicios de Abogline',
+                '',
+                '',
+                '',
+                '0',
+                '0',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
 
     }
 

@@ -298,6 +298,7 @@ class UsuariosController extends Controller{
                     '',
                     '0',
                     '0',
+                    '1',
                     '1'
                 )
             ";
@@ -391,18 +392,24 @@ class UsuariosController extends Controller{
 
             //  Notificar al cliente el estado completado del perfil
 
+            if($perfil == "cliente")
+                $mensaje = "Felicitaciones, ha completado su perfil, ahora puede registrar su caso.";
+            else
+                $mensaje = "Felicitaciones, ha completado su perfil, ahora puede buscar un caso.";
+
             $sqlString = "
                 INSERT INTO notificaciones values (
                     '0',
                     '".$usuario."',
                     '1',
                     'Perfil completado',
-                    'Felicitaciones, ha completado su perfil, ahora puede registrar su caso.',
+                    '".$mensaje."',
                     '',
                     '',
                     '',
                     '0',
                     '0',
+                    '1',
                     '1'
                 )
             ";

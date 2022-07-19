@@ -178,7 +178,8 @@ class CoreController extends Controller{
                 'idCaso',
                 '".$idCalendario."',
                 '".$idCaso."',
-                '3'
+                '3',
+                '1'
             )
         ";
 
@@ -264,33 +265,72 @@ class CoreController extends Controller{
 
     public function apiCoreGenerarTokenPagos(Request $request){
 
+        //  Parametros de entrada
+
+        $title = $request->title;
+        $description = $request->description;
+        $value = $request->value;
+        $usuario = $request->usuario;
+
         //  Generar token
 
-        $curl = curl_init();
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => 'https://apify.epayco.co/',
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'public_key' => '6e52effbd61ab02ad221e621310d7155',
+                'Authorization' => 'Basic aW5mb2Fib2dhZG9zLmZhY3R1cmFjaW9uQGdtYWlsLmNvbTpBYm9nYWRvczIwMjIq'
+            ]
+        ]);
 
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://apify.epayco.co/login/mail",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => "",
-            CURLOPT_HTTPHEADER => array(
-                "Authorization: Basic aW5mb2Fib2dhZG9zLmZhY3R1cmFjaW9uQGdtYWlsLmNvbTpBYm9nYWRvczIwMjIq",
-                "Content-Type: application/json",
-                "Postman-Token: e4c7aa07-067f-4a42-ae36-6cc05f853aab",
-                "cache-control: no-cache",
-                "public_key: 6e52effbd61ab02ad221e621310d7155"
-            ),
-        ));
+        $response = $client->post('login/mail');
+        $parsedResponse = \json_decode($response->getBody(), true);
+        $token = $parsedResponse['token'];
 
-        $response = curl_exec($curl);
-        $responseData = json_decode($response,true);
-        $token = $responseData["token"];
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => 'https://apify.epayco.co/',
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'public_key' => '6e52effbd61ab02ad221e621310d7155',
+                'Authorization' => 'Bearer '.$token
+            ]
+        ]);
+
+        $sqlString = "
+            SELECT
+                email
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $email = $result->email;
+
+        $response = $client->post('collection/link/create',[
+            'json' => [
+                'quantity' => '1',
+                'onePayment' => true,
+                'amount' => $value,
+                'currency' => 'COP',
+                'id' => '0',
+                'base' => '0',
+                'description' => $description,
+                'title' => $title,
+                'typeSell' => '1',
+                'tax' => '0',
+                'email' => $email
+            ],
+        ]);
+
+        $parsedResponse = \json_decode($response->getBody(), true);
+        $data = $parsedResponse['data'];
+        $link = $data['routeLink'];
         
-        return response()->json($token);    
+        return response()->json($link);
 
     }
 
@@ -345,7 +385,15 @@ class CoreController extends Controller{
         $idCaso = $request->idCaso;
 
         //  Finalizar actividad
-        DB::delete("DELETE FROM actividades WHERE id = '".$idActividad."'");
+
+        DB::update("
+            UPDATE 
+                actividades 
+            SET 
+                estado = '2'
+            WHERE 
+                id = '".$idActividad."'
+        ");
 
         //  Crear actividad
 
@@ -357,7 +405,8 @@ class CoreController extends Controller{
                     '".$idActividadCrear."',
                     '".$cliente."',
                     '".$idCaso."',
-                    now()
+                    now(),
+                    '1'
                 )
             ";
 
@@ -369,7 +418,8 @@ class CoreController extends Controller{
                     '".$idActividadCrear."',
                     '".$abogado."',
                     '".$idCaso."',
-                    now()
+                    now(),
+                    '1'
                 )
             ";
 
@@ -443,7 +493,8 @@ class CoreController extends Controller{
                 '4',
                 '".$cliente."',
                 '".$idCaso."',
-                now()
+                now(),
+                '1'
             )
         ";
 
@@ -457,7 +508,8 @@ class CoreController extends Controller{
                 '4',
                 '".$abogado."',
                 '".$idCaso."',
-                now()
+                now(),
+                '1'
             )
         ";
 
