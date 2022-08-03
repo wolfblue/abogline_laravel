@@ -556,7 +556,16 @@ class AdminController extends Controller{
                 solicitudes.estado,
                 solicitudes.id_calendario,
                 usuarios.email,
-                usuarios.perfil
+                usuarios.perfil,
+                solicitudes.id_caso,
+                (
+                    select 
+                        date_format(fechaDesde,'%d-%m-%Y %r')  
+                    from 
+                        calendario
+                    where
+                        id = solicitudes.id_calendario
+                ) AS fechaDesde
             FROM
                 solicitudes,
                 usuarios
@@ -656,6 +665,274 @@ class AdminController extends Controller{
         $sql = DB::select($sqlString);
 
         return response()->json($sql);
+
+    }
+
+    //  CONSULTAR CONTRATOS
+
+    public function apiAdminConsultarContratos(Request $request){
+
+        //  Consultar contratos
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                contratos
+            ORDER BY
+                id_caso
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar resultado
+        return response()->json($sql);
+
+    }
+
+    //  RECHAZAR CONTRATO AL ABOGADO
+
+    public function apiAdminRechazarContrato(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $observacion = $request->observacion;
+
+        //  Rechazar contrato al abogado
+
+        $sqlString = "
+            UPDATE
+                contratos
+            SET
+                estado = '1',
+                observacion = '".$observacion."'
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Notificar al abogado el rechazo
+
+        $abogado = "";
+
+        $sqlString = "
+            SELECT
+                abogado
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado_usuario = 'aceptado' AND
+                estado_abogado = 'aceptado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->abogado;
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$abogado."',
+                '1',
+                'Contrato rechazado',
+                'Abogline rechazó el contrato del caso #".$idCaso.", por favor validar las observaciones en el seguimiento',
+                '',
+                '',
+                '',
+                '0',
+                '0',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    //  APROBAR CONTRATO
+
+    public function apiAdminAprobarContrato(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Aprobar contrato al abogado
+
+        $sqlString = "
+            UPDATE
+                contratos
+            SET
+                estado = '3'
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Notificar al abogado
+
+        $abogado = "";
+
+        $sqlString = "
+            SELECT
+                abogado
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado_usuario = 'aceptado' AND
+                estado_abogado = 'aceptado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->abogado;
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$abogado."',
+                '1',
+                'Contrato aprobado',
+                'Abogline aprobó el contrato del caso #".$idCaso.", esta pendiente por parte del cliente completar la información',
+                '',
+                '',
+                '',
+                '0',
+                '0',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    //  RECHAZAR CONTRATO AL CLIENTE
+
+    public function apiAdminRechazarContratoCliente(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $observacion = $request->observacion;
+
+        //  Rechazar contrato al abogado
+
+        $sqlString = "
+            UPDATE
+                contratos
+            SET
+                estado = '3',
+                observacion = '".$observacion."'
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Notificar al cliente el rechazo
+
+        $cliente = "";
+
+        $sqlString = "
+            SELECT
+                usuario
+            FROM
+                casos
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $cliente = $result->usuario;
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$cliente."',
+                '1',
+                'Contrato rechazado',
+                'Abogline rechazó el contrato del caso #".$idCaso.", por favor validar las observaciones en el seguimiento',
+                '',
+                '',
+                '',
+                '0',
+                '0',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    //  APROBAR CONTRATO CLIENTE
+
+    public function apiAdminAprobarContratoCliente(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Aprobar contrato al abogado
+
+        $sqlString = "
+            UPDATE
+                contratos
+            SET
+                estado = '5'
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Notificar al cliente
+
+        $cliente = "";
+
+        $sqlString = "
+            SELECT
+                usuario
+            FROM
+                casos
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $cliente = $result->usuario;
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$cliente."',
+                '1',
+                'Contrato aprobado',
+                'Abogline aprobó el contrato del caso #".$idCaso.", pronto se enviaran los documentos para firmar',
+                '',
+                '',
+                '',
+                '0',
+                '0',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
 
     }
 

@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App;
 use App\Usuarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 
 class CoreController extends Controller{
 
@@ -82,7 +86,8 @@ class CoreController extends Controller{
                 usuarios.identificacion,
                 usuarios.tipo_tp,
                 usuarios.tarjeta_licencia,
-                usuarios.direccion
+                usuarios.direccion,
+                usuarios.ciudad
             FROM
                 casos_usuario,
                 usuarios
@@ -111,6 +116,7 @@ class CoreController extends Controller{
         $fechaHasta = $request->fechaHasta;
         $usuario = $request->usuario;
         $abogado = $request->abogado;
+        $titleReunion = $request->titleReunion;
 
         //  Registrar evento
 
@@ -171,8 +177,8 @@ class CoreController extends Controller{
                 '0',
                 '".$abogado."',
                 '1',
-                'Solicitud de asesoría',
-                'El cliente ha solicitado una asesoría para el caso #".$idCaso." para la siguiente fecha: ".$fechaDesde." - ".$fechaHasta."',
+                'Solicitud de ".$titleReunion."',
+                'El cliente ha solicitado ".$titleReunion." para el caso #".$idCaso." para la siguiente fecha: ".$fechaDesde." - ".$fechaHasta."',
                 '',
                 '',
                 'idCaso',
@@ -383,6 +389,7 @@ class CoreController extends Controller{
         $cliente = $request->cliente;
         $abogado = $request->abogado;
         $idCaso = $request->idCaso;
+        $tipo = $request->tipo;
 
         //  Finalizar actividad
 
@@ -392,7 +399,7 @@ class CoreController extends Controller{
             SET 
                 estado = '2'
             WHERE 
-                id = '".$idActividad."'
+                tipo = '".$tipo."'
         ");
 
         //  Crear actividad
@@ -474,18 +481,21 @@ class CoreController extends Controller{
 
         DB::update($sqlString);
 
-        //  Eliminar actividad desición de continuidad
+        //  Actualizar estado actividad desición de continuidad
 
         $sqlString = "
-            DELETE FROM 
+            UPDATE 
                 actividades
+            SET
+                ESTADO = '2'
             WHERE
-                id_caso = '".$idCaso."'
+                id_caso = '".$idCaso."' AND
+                tipo = '3'
         ";
 
-        DB::delete($sqlString);
+        DB::update($sqlString);
 
-        //  Insertar actividad contratación al cliente
+        //  Insertar actividad generar cita al cliente
 
         $sqlString = "
             INSERT INTO actividades VALUES (
@@ -500,7 +510,7 @@ class CoreController extends Controller{
 
         DB::insert($sqlString);
 
-        //  Insertar actividad contratación al abogado
+        //  Insertar actividad generar cita al abogado
 
         $sqlString = "
             INSERT INTO actividades VALUES (
@@ -514,6 +524,523 @@ class CoreController extends Controller{
         ";
 
         DB::insert($sqlString);
+
+    }
+
+    //  CERRAR EL CASO COMO DESICIÓN DE CONTINUIDAD
+
+    public function apiCoreCerrarCaso(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $observacion1 = $request->observacion1;
+        $observacion2 = $request->observacion2;
+        $observacion3 = $request->observacion3;
+        $observacion4 = $request->observacion4;
+        $comentario = $request->comentario;
+        $cliente = $request->cliente;
+        $abogado = $request->abogado;
+
+        //  Cerrar el caso
+
+        $sqlString = "
+            UPDATE
+                casos
+            SET
+                estado = '4'
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Notificar al cliente
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$cliente."',
+                '1',
+                'Caso cerrado #".$idCaso."',
+                'Se ha cerrado el caso #".$idCaso." a partir de desición de continuidad',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Enviar correo electronico cliente
+
+        $sqlString = "
+            SELECT
+                email
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$cliente."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $email = $result->email;
+
+        $mail = new PHPMailer(true);
+
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'administrador@abogline.com';
+        $mail->Password = '4riK5YuDZy*E$7h';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+
+        $mail->Subject = "Abogline: Se ha cerrado el caso #".$idCaso." en desición de continuidad";
+
+        $html = "Se ha cerrado el caso #".$idCaso." correctamente por el proceso de desición de continuidad.";
+
+        $mail->Body = $html;
+
+        $mail->send();
+
+        //  Notificar al abogado
+
+        $sqlString = "
+            INSERT INTO notificaciones values (
+                '0',
+                '".$abogado."',
+                '1',
+                'Caso cerrado #".$idCaso."',
+                'El clienteSe ha cerrado el caso #".$idCaso." a partir de desición de continuidad',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Enviar correo electronico cliente
+
+        $sqlString = "
+            SELECT
+                email
+            FROM
+                usuarios
+            WHERE
+                usuario = '".$abogado."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $email = $result->email;
+
+        $mail = new PHPMailer(true);
+
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'administrador@abogline.com';
+        $mail->Password = '4riK5YuDZy*E$7h';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+
+        $mail->Subject = "Abogline: Se ha cerrado el caso #".$idCaso." en desición de continuidad";
+
+        $html = "El cliente ha cerrado el caso #".$idCaso." correctamente por el proceso de desición de continuidad.";
+
+        $mail->Body = $html;
+
+        $mail->send();
+
+        //  Finalizar actividad
+
+        $sqlString = "
+            UPDATE 
+                actividades
+            SET
+                ESTADO = '2'
+            WHERE
+                id_caso = '".$idCaso."' AND
+                tipo = '3'
+        ";
+
+        DB::update($sqlString);
+
+    }
+
+    //  GUARDAR CONTRATO
+
+    public function apiCoreSaveContrato(Request $request){
+
+        //  Parametros de entrada
+        
+        $idCaso = $request->idCaso;
+        $contratoNombreCliente = $request->contratoNombreCliente;
+        $contratoIdentificacionCliente = $request->contratoIdentificacionCliente;
+        $contratoLugarCliente = $request->contratoLugarCliente;
+        $contratoDireccionCliente = $request->contratoDireccionCliente;
+        $contratoNombreAbogado = $request->contratoNombreAbogado;
+        $contratoIdentificacionAbogado = $request->contratoIdentificacionAbogado;
+        $contratoLugarAbogado = $request->contratoLugarAbogado;
+        $contratoDireccionAbogado = $request->contratoDireccionAbogado;
+        $objetoContrato = $request->objetoContrato;
+        $contratoPrecio = $request->contratoPrecio;
+        $contratoMetodoPago = $request->contratoMetodoPago;
+        $contratoMetodoPago2 = $request->contratoMetodoPago2;
+        $contratoPorcentaje = $request->contratoPorcentaje;
+        $clausulaAdicional = $request->clausulaAdicional;
+        $contratoLicenciaAbogado = $request->contratoLicenciaAbogado;
+        $perfil = $request->perfil;
+        $borrador = $request->borrador;
+
+        //  Validar estado por perfil
+
+        switch($perfil){
+
+            case "abogado":
+
+                if($borrador == "1")
+                    $estado = "1";
+                else
+                    $estado = "2";
+
+            break;
+
+            case "administrador":
+
+                $estado = "2";
+
+            break;
+
+            case "cliente":
+
+                if($borrador == "1")
+                    $estado = "3";
+                else
+                    $estado = "4";
+
+            break;
+
+        }
+
+        //  Eliminar contrato
+        DB::delete("DELETE FROM contratos WHERE id_caso = '".$idCaso."'");
+
+        //  Insertar contrato
+
+        DB::insert("
+            INSERT INTO contratos VALUES (
+                '".$idCaso."',
+                '".$contratoNombreCliente."',
+                '".$contratoIdentificacionCliente."',
+                '".$contratoLugarCliente."',
+                '".$contratoDireccionCliente."',
+                '".$contratoNombreAbogado."',
+                '".$contratoIdentificacionAbogado."',
+                '".$contratoLugarAbogado."',
+                '".$contratoDireccionAbogado."',
+                '".$objetoContrato."',
+                '".$contratoPrecio."',
+                '".$contratoMetodoPago."',
+                '".$contratoMetodoPago2."',
+                '".$contratoPorcentaje."',
+                '".$clausulaAdicional."',
+                '".$contratoLicenciaAbogado."',
+                '".$estado."',
+                ''
+            )
+        ");
+
+    }
+
+    //  CONSULTAR CONTRATO DEL CASO
+
+    public function apiCoreGetContrato(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Consultar contrato
+        
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                contratos
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar respuesta
+        return response()->json($sql);
+
+    }
+
+    //  GENERAR CONTRATO
+
+    public function apiCoreGenerarContrato(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Consultar información del contrato
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                contratos
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result){
+
+            $nombreCliente = $result->contrato_nombre_cliente;
+            $ciudadCliente = $result->contrato_lugar_cliente;
+            $identificacionCliente = $result->contrato_identificacion_cliente;
+            $nombreAbogado = $result->contrato_nombre_abogado;
+            $identificacionAbogado = $result->contrato_identificacion_abogado;
+            $ciudadAbogado = $result->contrato_lugar_abogado;
+            $tarjetaAbogado = $result->contrato_licencia_abogado;
+            $precioContrato = number_format($result->contrato_precio,0);
+            $metodoPago = $result->contrato_metodo_pago;
+            $clausulaAdicional = $result->clausula_adicional;
+
+            if($result->contrato_metodo_pago2)
+                $metodoPago .= " ".$result->contrato_metodo_pago2;
+
+            if($result->contrato_porcentaje)
+                $metodoPago .= " ".$result->contrato_porcentaje."%";
+
+        }
+
+        //  Generar pdf contrato
+
+        $pdf = App::make('dompdf.wrapper')->setPaper("a4", 'portrait');
+
+        $html = "
+
+            <div style='margin:4%;font-size:18px;line-height: 25px;'>
+                
+                <br/><br/><br/>
+                
+                <center>
+                    <b>CONTRATO DE PRESTACION DE SERVICIOS PROFESIONALES DE ABOGADO</b>
+                </center>
+                
+                <br/><br/><br/>
+
+                <p>
+                    De una parte <b><u>$nombreCliente</u></b>, mayor de edad, domiciliado en la ciudad de <b><u>$ciudadCliente</u></b>, 
+                    identificado con cédula de ciudadanía número <b><u>$identificacionCliente</u></b> de <b><u>$ciudadCliente</u></b>, 
+                    que para efectos de este documento se denominará XXXXXXX, y por otra, <b><u>$nombreAbogado</u></b>, igualmente mayor de edad y domiciliado en la ciudad de <b><u>$ciudadAbogado</u></b>, 
+                    identificado con cédula de ciudadanía número <b><u>$identificacionAbogado</u></b> expedida en <b><u>$ciudadAbogado</u></b>, 
+                    abogado titulado, en ejercicio, con tarjeta profesional número <b><u>$tarjetaAbogado</u></b> 
+                    del Consejo Superior de la Judicatura quien para efectos de este contrato se denominará EL MANDATARIO, 
+                    hemos convenido celebrar el presente CONTRATO DE PRESTACIÓN DE SERVICIOS PROFESIONALES, el cual se regula por las cláusulas 
+                    que a continuación se indican y por las disposiciones del Código Civil y comercial aplicables a la materia:
+                </p>
+                
+                <br/><br/>
+                
+                <center>
+                    <b>CLAUSULAS</b>
+                </center>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>PRIMERA:</b> 
+                    EL Abogado se obliga de manera independiente a: (Sección OBJETO DEL CONTRATO)
+                </p>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>SEGUNDA:</b> 
+                    EL MANDANTE cancelará, como contraprestación, por concepto de honorarios la suma de ($$precioContrato), 
+                    los cuales serán pagaderos de la siguiente manera:
+                </p>
+                
+                <br/><br/>
+                
+                <p>$metodoPago</p>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>TERCERA:</b> 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor diam et nunc hendrerit consectetur. Morbi lacinia ante et lectus volutpat, 
+                    a suscipit dolor blandit. Phasellus interdum ac sapien eget blandit. 
+                    Phasellus cursus, metus sed facilisis sodales, odio diam euismod arcu, at pellentesque dui augue a massa. 
+                    Donec mattis convallis luctus. Pellentesque blandit neque eu enim blandit faucibus. 
+                    Suspendisse volutpat nulla id arcu molestie, eget efficitur magna interdum. Morbi at molestie mi, ut lobortis nulla..
+                </p>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>CUARTA:</b> 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor diam et nunc hendrerit consectetur. Morbi lacinia ante et lectus volutpat, 
+                    a suscipit dolor blandit. Phasellus interdum ac sapien eget blandit. Phasellus cursus, metus sed facilisis sodales, odio diam euismod arcu, 
+                    at pellentesque dui augue a massa. Donec mattis convallis luctus. Pellentesque blandit neque eu enim blandit faucibus. 
+                    Suspendisse volutpat nulla id arcu molestie, eget efficitur magna interdum. Morbi at molestie mi, ut lobortis nulla.
+                </p>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>QUINTA:</b> 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor diam et nunc hendrerit consectetur. Morbi lacinia ante et lectus volutpat, 
+                    a suscipit dolor blandit. Phasellus interdum ac sapien eget blandit. Phasellus cursus, metus sed facilisis sodales, odio diam euismod arcu, 
+                    at pellentesque dui augue a massa. Donec mattis convallis luctus. Pellentesque blandit neque eu enim blandit faucibus. 
+                    Suspendisse volutpat nulla id arcu molestie, eget efficitur magna interdum. Morbi at molestie mi, ut lobortis nulla.
+                </p>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>SEXTA:</b>
+                    $clausulaAdicional
+                </p>
+                
+                <br/><br/>
+                
+                <p>
+                    <b>SEPTIMA: MERITO EJECUTIVO.</b> 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tempor diam et nunc hendrerit consectetur. Morbi lacinia ante et lectus volutpat, a suscipit dolor blandit. Phasellus interdum ac sapien eget blandit. Phasellus cursus, metus sed facilisis sodales, odio diam euismod arcu, at pellentesque dui augue a massa. Donec mattis convallis luctus. Pellentesque blandit neque eu enim blandit faucibus. Suspendisse volutpat nulla id arcu molestie, eget efficitur magna interdum. Morbi at molestie mi, ut lobortis nulla.
+                </p>
+                
+                <br/><br/>
+
+                <p>
+                    En señal de conformidad se suscribe el presente documento en tres ejemplares del mismo tenor, por las partes intervinientes, el día ".date('d')." del mes de ".date('M')." del año ".date('Y').". 
+                </p>
+                
+                <br/><br/>
+                
+                <table style='width:100%;font-weight:bold;'>
+                    
+                    <tr>
+                    
+                    <td style='width:50%;'>
+                    
+                        <br/><br/><br/><br/>
+                    
+                        $nombreCliente<br/>
+                        CC $identificacionCliente de $ciudadCliente
+                    
+                    </td>
+                    
+                    <td>
+                    
+                        <br/><br/><br/><br/>
+                        
+                        $nombreAbogado<br/>
+                        CC $identificacionAbogado de $ciudadAbogado <br/>
+                        # Tarjeta $tarjetaAbogado
+                        
+                    </td>
+                    
+                    </tr>
+                    
+                    <tr>
+                    
+                    <td>
+                    
+                        <br/><br/><br/><br/><br/><br/>
+                        
+                        DIEGO ANDRES MOLINA ACEVEDO<br>
+                        CC 1.023.962.482 DE BOGOTÁ<br>
+                        REPRESENTANTE LEGAL<br>
+                        INFOABOGADOS SAS (ABOGLINE)
+                        
+                    </td>
+                    
+                    <td></td>
+                    
+                    </tr>
+                    
+                </table>
+        
+            </div>
+        ";
+
+        $pdf->loadHTML($html);
+
+        $path = public_path('contratos/');
+        $fileName =  $idCaso.".pdf" ;
+
+        //  Borrar archivo si existe
+
+        if(file_exists($path . '' . $fileName))
+            unlink($path . '' . $fileName);
+
+        $pdf->save($path . '' . $fileName);
+
+    }
+
+    //  CONSULTAR CLIENTE DE UN CASO
+
+    public function apiCoreConsultarCliente(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Consultar cliente del caso
+
+        $sqlString = "
+            SELECT 
+                *
+            FROM
+                usuarios
+            WHERE
+                usuario IN (
+                    SELECT
+                        usuario
+                    FROM
+                        casos
+                    WHERE
+                        id = '".$idCaso."'
+                )
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar respuesta
+        return response()->json($sql);
 
     }
 

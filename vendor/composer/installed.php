@@ -5,11 +5,20 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '008b71d8d9739aabc6ca0ddec3f5a052fa131045',
+        'reference' => 'c0397057a494df1952a4de6bfd9a57a9882815d2',
         'name' => 'laravel/laravel',
         'dev' => true,
     ),
     'versions' => array(
+        'barryvdh/laravel-dompdf' => array(
+            'pretty_version' => 'v2.0.0',
+            'version' => '2.0.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../barryvdh/laravel-dompdf',
+            'aliases' => array(),
+            'reference' => '1d47648c6cef37f715ecb8bcc5f5a656ad372e27',
+            'dev_requirement' => false,
+        ),
         'cordoval/hamcrest-php' => array(
             'dev_requirement' => true,
             'replaced' => array(
@@ -47,6 +56,15 @@
             'install_path' => __DIR__ . '/../doctrine/lexer',
             'aliases' => array(),
             'reference' => 'e864bbf5904cb8f5bb334f99209b48018522f042',
+            'dev_requirement' => false,
+        ),
+        'dompdf/dompdf' => array(
+            'pretty_version' => 'v2.0.0',
+            'version' => '2.0.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../dompdf/dompdf',
+            'aliases' => array(),
+            'reference' => '79573d8b8a141ec8a17312515de8740eed014fa9',
             'dev_requirement' => false,
         ),
         'dragonmantank/cron-expression' => array(
@@ -358,7 +376,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '008b71d8d9739aabc6ca0ddec3f5a052fa131045',
+            'reference' => 'c0397057a494df1952a4de6bfd9a57a9882815d2',
             'dev_requirement' => false,
         ),
         'laravel/tinker' => array(
@@ -395,6 +413,15 @@
             'install_path' => __DIR__ . '/../league/mime-type-detection',
             'aliases' => array(),
             'reference' => 'b38b25d7b372e9fddb00335400467b223349fd7e',
+            'dev_requirement' => false,
+        ),
+        'masterminds/html5' => array(
+            'pretty_version' => '2.7.5',
+            'version' => '2.7.5.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../masterminds/html5',
+            'aliases' => array(),
+            'reference' => 'f640ac1bdddff06ea333a920c95bbad8872429ab',
             'dev_requirement' => false,
         ),
         'mockery/mockery' => array(
@@ -489,6 +516,24 @@
             'aliases' => array(),
             'reference' => 'bae7c545bef187884426f042434e561ab1ddb182',
             'dev_requirement' => true,
+        ),
+        'phenx/php-font-lib' => array(
+            'pretty_version' => '0.5.4',
+            'version' => '0.5.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phenx/php-font-lib',
+            'aliases' => array(),
+            'reference' => 'dd448ad1ce34c63d09baccd05415e361300c35b4',
+            'dev_requirement' => false,
+        ),
+        'phenx/php-svg-lib' => array(
+            'pretty_version' => '0.4.1',
+            'version' => '0.4.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phenx/php-svg-lib',
+            'aliases' => array(),
+            'reference' => '4498b5df7b08e8469f0f8279651ea5de9626ed02',
+            'dev_requirement' => false,
         ),
         'php-parallel-lint/php-console-color' => array(
             'pretty_version' => 'v0.3',
@@ -733,6 +778,15 @@
             'replaced' => array(
                 0 => '3.9.6',
             ),
+        ),
+        'sabberworm/php-css-parser' => array(
+            'pretty_version' => '8.4.0',
+            'version' => '8.4.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../sabberworm/php-css-parser',
+            'aliases' => array(),
+            'reference' => 'e41d2140031d533348b2192a83f02d8dd8a71d30',
+            'dev_requirement' => false,
         ),
         'scrivo/highlight.php' => array(
             'pretty_version' => 'v9.18.1.8',

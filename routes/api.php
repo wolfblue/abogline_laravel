@@ -38,6 +38,11 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAprobarSolicitud", "AdminController@apiAprobarSolicitud");
   Route::match(['post', 'options'], "apiRechazarSolicitud", "AdminController@apiRechazarSolicitud");
   Route::match(['post', 'options'], "apiAdminConsulta", "AdminController@apiAdminConsulta");
+  Route::match(['post', 'options'], "apiAdminConsultarContratos", "AdminController@apiAdminConsultarContratos");
+  Route::match(['post', 'options'], "apiAdminRechazarContrato", "AdminController@apiAdminRechazarContrato");  
+  Route::match(['post', 'options'], "apiAdminAprobarContrato", "AdminController@apiAdminAprobarContrato");
+  Route::match(['post', 'options'], "apiAdminRechazarContratoCliente", "AdminController@apiAdminRechazarContratoCliente");  
+  Route::match(['post', 'options'], "apiAdminAprobarContratoCliente", "AdminController@apiAdminAprobarContratoCliente");
 
   //  Casos
 
@@ -76,6 +81,11 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiCoreFinalizarActividad", "CoreController@apiCoreFinalizarActividad");
   Route::match(['post', 'options'], "apiCoreFinalizarCaso", "CoreController@apiCoreFinalizarCaso");
   Route::match(['post', 'options'], "apiCoreContinuarCaso", "CoreController@apiCoreContinuarCaso");
+  Route::match(['post', 'options'], "apiCoreCerrarCaso", "CoreController@apiCoreCerrarCaso");
+  Route::match(['post', 'options'], "apiCoreSaveContrato", "CoreController@apiCoreSaveContrato");
+  Route::match(['post', 'options'], "apiCoreGetContrato", "CoreController@apiCoreGetContrato");
+  Route::match(['post', 'options'], "apiCoreGenerarContrato", "CoreController@apiCoreGenerarContrato");
+  Route::match(['post', 'options'], "apiCoreConsultarCliente", "CoreController@apiCoreConsultarCliente");
 
   //  NOTIFICACIONES
 

@@ -177,8 +177,8 @@ class NotificacionesController extends Controller{
 
             case "3":{
 
-                //  Aprobar solicitud de asesoría
-                $this->aprobarSolicitudAsesoria($idCaso,$abogado,$idCalendario);
+                //  Aprobar solicitud de reunion
+                $this->aprobarSolicitudReunion($idCaso,$abogado,$idCalendario);
 
             }
             break;
@@ -322,24 +322,11 @@ class NotificacionesController extends Controller{
 
     }
 
-    //  APROBAR SOLICITUD DE ASESORÍA
+    //  APROBAR SOLICITUD DE REUNIÓN
 
-    public function aprobarSolicitudAsesoria($idCaso,$abogado,$idCalendario){
+    public function aprobarSolicitudReunion($idCaso,$abogado,$idCalendario){
 
-        //  Aprobar calendario
-
-        $sqlString = "
-            UPDATE
-                calendario
-            SET
-                estado = '2'
-            WHERE
-                id = '".$idCalendario."'
-        ";
-
-        DB::update($sqlString);
-
-        //  Crear actividad desición de continuidad
+        //  Obtener cliente
 
         $sqlString = "
             SELECT
@@ -355,18 +342,171 @@ class NotificacionesController extends Controller{
         foreach($sql as $result)
             $cliente = $result->usuario;
 
+        //  Notificar al cliente
+
         $sqlString = "
-            INSERT INTO actividades values (
+            INSERT INTO notificaciones values (
                 '0',
-                '3',
                 '".$cliente."',
+                '1',
+                'Solicitud aceptada para reunión del caso #".$idCaso."',
+                'El abogado aceptó la solicitud de reunión para el caso #".$idCaso."',
+                '',
+                '',
+                '',
+                '0',
                 '".$idCaso."',
-                now(),
+                '1',
                 '1'
             )
         ";
 
         DB::insert($sqlString);
+
+        //  Aprobar calendario
+
+        $sqlString = "
+            UPDATE
+                calendario
+            SET
+                estado = '2'
+            WHERE
+                id = '".$idCalendario."'
+        ";
+
+        DB::update($sqlString);
+
+        //  Validar actividad actual del caso
+
+        $tipoActividad = "2";
+
+        $sqlString = "
+            SELECT
+                MAX(tipo) AS tipo
+            FROM
+                actividades
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $tipoActividad = $result->tipo;
+
+        switch($tipoActividad){
+
+            case "2":
+
+                //  Crear actividad desición de continuidad cliente
+
+                $sqlString = "
+                    SELECT
+                        usuario
+                    FROM
+                        casos
+                    WHERE
+                        id = '".$idCaso."'
+                ";
+
+                $sql = DB::select($sqlString);
+
+                foreach($sql as $result)
+                    $cliente = $result->usuario;
+
+                $sqlString = "
+                    INSERT INTO actividades values (
+                        '0',
+                        '3',
+                        '".$cliente."',
+                        '".$idCaso."',
+                        now(),
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
+                
+                //  Crear actividad desición de continuidad abogado
+
+                $sqlString = "
+                    INSERT INTO actividades values (
+                        '0',
+                        '3',
+                        '".$abogado."',
+                        '".$idCaso."',
+                        now(),
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
+
+                //  Bloquear solicitar asesoría
+
+                $sqlString = "
+                    UPDATE
+                        actividades
+                    SET
+                        estado = '2'
+                    WHERE
+                        id_caso = '".$idCaso."' AND
+                        tipo = '2'
+                ";
+
+                DB::update($sqlString);
+
+            break;
+
+            case "4":
+
+                //  Insertar actividad generar cita al cliente
+
+                $sqlString = "
+                    INSERT INTO actividades VALUES (
+                        '0',
+                        '5',
+                        '".$cliente."',
+                        '".$idCaso."',
+                        now(),
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
+
+                //  Insertar actividad generar cita al abogado
+
+                $sqlString = "
+                    INSERT INTO actividades VALUES (
+                        '0',
+                        '5',
+                        '".$abogado."',
+                        '".$idCaso."',
+                        now(),
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
+
+                //  Bloquear generar cita
+
+                $sqlString = "
+                    UPDATE
+                        actividades
+                    SET
+                        estado = '2'
+                    WHERE
+                        id_caso = '".$idCaso."' AND
+                        tipo = '4'
+                ";
+
+                DB::update($sqlString);
+
+            break;
+
+        }
 
     }
 
