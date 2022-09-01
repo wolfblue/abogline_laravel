@@ -10,9 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 
 class AdminController extends Controller{
 
-    /********************************************************************************** */
     // REGISTRAR CIUDAD
-    /********************************************************************************** */
 
     public function apiAdminCiudadRegister(Request $request){
 
@@ -31,9 +29,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR CIUDAD
-    /********************************************************************************** */
 
     public function apiAdminCiudadGet(Request $request){
 
@@ -47,9 +43,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ELIMINAR CIUDAD
-    /********************************************************************************** */
 
     public function apiAdminCiudadDelete(Request $request){
 
@@ -63,9 +57,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR GENERO
-    /********************************************************************************** */
 
     public function apiAdminGeneroRegister(Request $request){
 
@@ -84,9 +76,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR GENEROS
-    /********************************************************************************** */
 
     public function apiAdminGeneroGet(Request $request){
 
@@ -100,9 +90,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ELIMINAR GENERO
-    /********************************************************************************** */
 
     public function apiAdminGeneroDelete(Request $request){
 
@@ -116,9 +104,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR TIPO DE DOCUMENTO
-    /********************************************************************************** */
 
     public function apiAdminTipoDocumentoRegister(Request $request){
 
@@ -137,9 +123,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR TIPO DE DOCUMENTO
-    /********************************************************************************** */
 
     public function apiAdminTipoDocumentoGet(Request $request){
 
@@ -153,9 +137,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ELIMINAR TIPO DE DOCUMENTO
-    /********************************************************************************** */
 
     public function apiAdminTipoDocumentoDelete(Request $request){
 
@@ -169,9 +151,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR MUNICIPIO
-    /********************************************************************************** */
 
     public function apiAdminMunicipioRegister(Request $request){
 
@@ -190,9 +170,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR MUNICIPIOS
-    /********************************************************************************** */
 
     public function apiAdminMunicipioGet(Request $request){
 
@@ -206,9 +184,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ELIMINAR MUNICIPIO
-    /********************************************************************************** */
 
     public function apiAdminMunicipioDelete(Request $request){
 
@@ -222,9 +198,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ACTUALIZAR ADMIN
-    /********************************************************************************** */
 
     public function apiAdminUpdate(Request $request){
 
@@ -243,9 +217,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR ADMINISTRACIÓN
-    /********************************************************************************** */
 
     public function apiAdminGetContenido(Request $request){
 
@@ -262,9 +234,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR TITULO
-    /********************************************************************************** */
 
     public function apiAdminTituloRegister(Request $request){
 
@@ -283,9 +253,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR TITULOS
-    /********************************************************************************** */
 
     public function apiAdminTituloGet(Request $request){
 
@@ -299,9 +267,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ELIMINAR TITULO
-    /********************************************************************************** */
 
     public function apiAdminTituloDelete(Request $request){
 
@@ -315,9 +281,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR USUARIOS
-    /********************************************************************************** */
 
     public function apiAdminGetUsuarios(Request $request){
 
@@ -340,9 +304,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR DOCUMENTOS DE UN USUARIO
-    /********************************************************************************** */
 
     public function apiAdminGetDocumentosUser(Request $request){
 
@@ -359,9 +321,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // APROBAR ABOGADO
-    /********************************************************************************** */
 
     public function apiAdminAprobarAbogado(Request $request){
 
@@ -445,9 +405,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // RECHAZAR ABOGADO
-    /********************************************************************************** */
 
     public function apiAdminRechazarAbogado(Request $request){
 
@@ -472,9 +430,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // BLOQUEAR USUARIO
-    /********************************************************************************** */
 
     public function apiAdminBloquearUsuario(Request $request){
 
@@ -495,9 +451,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR SOLICITUDES
-    /********************************************************************************** */
 
     public function apiConsultarSolicitudes(Request $request){
 
@@ -572,6 +526,8 @@ class AdminController extends Controller{
             WHERE
                 solicitudes.usuario = usuarios.usuario AND
                 solicitudes.estado = 1
+            ORDER BY
+                solicitudes.id DESC
         ";
 
         $sql = DB::select($sqlString);
@@ -580,9 +536,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // APROBAR SOLICITUD
-    /********************************************************************************** */
 
     public function apiAprobarSolicitud(Request $request){
 
@@ -611,19 +565,107 @@ class AdminController extends Controller{
             $solicitud = $result->solicitud;
             $idCaso = $result->id_caso;
 
+            //  Consultar cliente
+
+            $cliente = "";
+            
+            $sqlString2 = "
+                SELECT
+                    usuario
+                FROM
+                    casos
+                WHERE
+                    id = '".$idCaso."'
+            ";
+
+            $sql2 = DB::select($sqlString2);
+
+            foreach($sql2 as $result2)
+                $cliente = $result2->usuario;
+                
+            //  Consultar abogado
+
+            $abogado = "";
+
+            $sqlString2 = "
+                SELECT
+                    abogado
+                FROM
+                    casos_usuario
+                WHERE
+                    id_caso = '".$idCaso."' AND
+                    estado_usuario = 'aceptado' AND
+                    estado_abogado = 'aceptado'
+            ";
+
+            $sql2 = DB::select($sqlString2);
+
+            foreach($sql2 as $result2)
+                $abogado = $result2->abogado;
+
             switch($solicitud){
 
                 case "Finalizar contrato":
 
-                    $sqlString = "UPDATE casos SET paso7_finalizar_contrato = 'proceso' WHERE id = '".$idCaso."'";
-                    DB::update($sqlString);
+                    //  Registrar actividad
+
+                    $sqlString = "
+                        INSERT INTO actividades VALUES (
+                            '0',
+                            '6',
+                            '".$cliente."',
+                            '".$idCaso."',
+                            now(),
+                            '1'
+                        )
+                    ";
+
+                    DB::insert($sqlString);
+
+                    $sqlString = "
+                        INSERT INTO actividades VALUES (
+                            '0',
+                            '6',
+                            '".$abogado."',
+                            '".$idCaso."',
+                            now(),
+                            '1'
+                        )
+                    ";
+
+                    DB::insert($sqlString);
                 
                 break;
 
                 case "Pagos":
 
-                    $sqlString = "UPDATE casos SET paso8_pagos = 'proceso' WHERE id = '".$idCaso."'";
-                    DB::update($sqlString);
+                    //  Registrar actividad
+
+                    $sqlString = "
+                        INSERT INTO actividades VALUES (
+                            '0',
+                            '7',
+                            '".$cliente."',
+                            '".$idCaso."',
+                            now(),
+                            '1'
+                        )
+                    ";
+
+                    DB::insert($sqlString);
+
+                    $sqlString = "
+                        INSERT INTO actividades VALUES (
+                            '0',
+                            '7',
+                            '".$abogado."',
+                            '".$idCaso."',
+                            now(),
+                            '1'
+                        )
+                    ";
+
+                    DB::insert($sqlString);
                 
                 break;
 
@@ -633,9 +675,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // RECHAZAR SOLICITUD
-    /********************************************************************************** */
 
     public function apiRechazarSolicitud(Request $request){
 
@@ -647,9 +687,7 @@ class AdminController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // CONSULTAR ADMIN
-    /********************************************************************************** */
 
     public function apiAdminConsulta(Request $request){
 
@@ -933,6 +971,123 @@ class AdminController extends Controller{
         ";
 
         DB::insert($sqlString);
+
+    }
+
+    //  APROBAR SOLICITUD DE DOCUMENTOS
+
+    public function apiAdminAprobarSolicitudDocumentos(Request $request){
+
+        //  Parametros de entrada
+        
+        $idSolicitud = $request->idSolicitud;
+        $idCaso = $request->idCaso;
+
+        //  Aprobar solicitud del caso
+
+        $sqlString = "
+            UPDATE 
+                documentos
+            SET
+                estado = '2'
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado = '1'
+        ";
+
+        DB::update($sqlString);
+
+        //  ACTUALIZAR ESTADO DE LA SOLICITUD
+
+        $sqlString = "
+            UPDATE
+                solicitudes
+            SET
+                estado = '0'
+            WHERE
+                id = '".$idSolicitud."'
+        ";
+
+        DB::update($sqlString);
+
+    }
+
+    //  RECHAZAR SOLICITUD DE DOCUMENTOS
+
+    public function apiAdminRechazarSolicitudDocumentos(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $motivo = $request->motivo;
+        $idSolicitud = $request->idSolicitud;
+
+        //  Rechazar solicitud
+        
+        $sqlString = "
+            UPDATE
+                documentos
+            SET
+                estado = '0',
+                observacion = '".$motivo."'
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado = '1'
+        ";
+
+        DB::update($sqlString);
+
+        //  Consultar abogado del caso
+
+        $sqlString = "
+            SELECT
+                abogado
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado_usuario = 'aceptado' AND
+                estado_abogado = 'aceptado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->abogado;
+
+        //  Notificar al abogado
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$abogado."',
+                '1',
+                'Rechazado solicitud de documentos',
+                'Se rechazo la solicitud de documentos por motivo: ".$motivo."',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Actualizar estado de la solicitud
+
+        $sqlString = "
+            UPDATE 
+                solicitudes
+            SET
+                estado = '0'
+            WHERE
+                id = '".$idSolicitud."'
+        ";
+
+        DB::update($sqlString);
 
     }
 

@@ -12,9 +12,7 @@ use PHPMailer\PHPMailer\Exception;
 
 class CoreController extends Controller{
 
-    /********************************************************************************** */
     // REGISTRAR MENSAJE DEL CHAT
-    /********************************************************************************** */
 
     public function apiCoreChatSave(Request $request){
 
@@ -39,9 +37,7 @@ class CoreController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // OBTENER MENSAJE DEL CHAT
-    /********************************************************************************** */
 
     public function apiCoreChatGet(Request $request){
 
@@ -66,9 +62,7 @@ class CoreController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // OBTENER ABOGADO DEL CASO
-    /********************************************************************************** */
 
     public function apiCoreAbogadoGet(Request $request){
 
@@ -103,9 +97,7 @@ class CoreController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // REGISTRAR EVENTO CALENDARIO
-    /********************************************************************************** */
 
     public function apiCoreCalendarioSave(Request $request){
 
@@ -130,7 +122,7 @@ class CoreController extends Controller{
                 '',
                 '".$usuario."',
                 '".$abogado."',
-                'Asesoría'
+                '".$titleReunion."'
             )
         ";
 
@@ -193,9 +185,7 @@ class CoreController extends Controller{
 
     }
 
-    /********************************************************************************** */
     // ACTIVAR ACTIVIDAD
-    /********************************************************************************** */
 
     public function apiCoreCrearActividad(Request $request){
 
@@ -207,14 +197,107 @@ class CoreController extends Controller{
         $usuario = $request->usuario;
         $actividadDesc = $request->actividadDesc;
 
+        //  Validar tipo de actividad
+
+        $tipoActividad = "";
+
+        switch($actividad){
+
+            case "paso7_finalizar_contrato":
+                $tipoActividad = "6";
+            break;
+
+            case "paso8_pagos":
+                $tipoActividad = "7";
+            break;
+
+            case "paso9_reunion_virtual":
+                $tipoActividad = "8";
+            break;
+
+            case "paso10_documentacion":
+                $tipoActividad = "9";
+            break;
+
+            case "paso11_reunion_presencial":
+                $tipoActividad = "10";
+            break;
+
+            case "paso12_informacion":
+                $tipoActividad = "11";
+            break;
+
+        }
+
+        //  Consultar cliente
+
+        $cliente = "";
+        
+        $sqlString = "
+            SELECT
+                usuario
+            FROM
+                casos
+            WHERE
+                id = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $cliente = $result->usuario;
+            
+        //  Consultar abogado
+
+        $abogado = "";
+
+        $sqlString = "
+            SELECT
+                abogado
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado_usuario = 'aceptado' AND
+                estado_abogado = 'aceptado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->abogado;
+
         //  Validar aprobación
 
         if($aprobacion == "0"){
 
-            //  Registrar evento
+            //  Registrar actividad
 
-            $sqlString = "UPDATE casos SET ".$actividad." = 'proceso' WHERE id = '".$idCaso."'";
-            DB::update($sqlString);
+            $sqlString = "
+                INSERT INTO actividades VALUES (
+                    '0',
+                    '".$tipoActividad."',
+                    '".$cliente."',
+                    '".$idCaso."',
+                    now(),
+                    '1'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            $sqlString = "
+                INSERT INTO actividades VALUES (
+                    '0',
+                    '".$tipoActividad."',
+                    '".$abogado."',
+                    '".$idCaso."',
+                    now(),
+                    '1'
+                )
+            ";
+
+            DB::insert($sqlString);
 
         }else{
 
@@ -391,6 +474,34 @@ class CoreController extends Controller{
         $idCaso = $request->idCaso;
         $tipo = $request->tipo;
 
+        //  Validar descripción de la actividad
+
+        $descripcionActividad = "";
+
+        switch($idActividadCrear){
+
+            case "1":
+                $descripcionActividad = "Pago de asesoría";
+            break;
+
+            case "2":
+                $descripcionActividad = "Solicitar asesoría";
+            break;
+
+            case "3":
+                $descripcionActividad = "Decisión de continuidad";
+            break;
+
+            case "4":
+                $descripcionActividad = "Generar cita contratación";
+            break;
+
+            case "5":
+                $descripcionActividad = "Contratación";
+            break;
+
+        }
+
         //  Finalizar actividad
 
         DB::update("
@@ -407,7 +518,7 @@ class CoreController extends Controller{
         if($idActividadCrear){
 
             $sqlString = "
-                INSERT INTO actividades values (
+                INSERT INTO actividades VALUES (
                     '0',
                     '".$idActividadCrear."',
                     '".$cliente."',
@@ -420,12 +531,53 @@ class CoreController extends Controller{
             DB::insert($sqlString);
 
             $sqlString = "
-                INSERT INTO actividades values (
+                INSERT INTO actividades VALUES (
                     '0',
                     '".$idActividadCrear."',
                     '".$abogado."',
                     '".$idCaso."',
                     now(),
+                    '1'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+            //  Notificar
+
+            $sqlString = "
+                INSERT INTO notificaciones VALUES (
+                    '0',
+                    '".$cliente."',
+                    '1',
+                    'Actividad registrada ".$descripcionActividad."',
+                    'Se ha registrado nueva actividad ".$descripcionActividad." para el caso #".$idCaso."',
+                    '',
+                    '',
+                    '',
+                    '0',
+                    '".$idCaso."',
+                    '1',
+                    '1'
+                )
+            ";
+
+            DB::insert($sqlString);
+
+
+            $sqlString = "
+                INSERT INTO notificaciones VALUES (
+                    '0',
+                    '".$abogado."',
+                    '1',
+                    'Actividad registrada ".$descripcionActividad."',
+                    'Se ha registrado nueva actividad ".$descripcionActividad." para el caso #".$idCaso."',
+                    '',
+                    '',
+                    '',
+                    '0',
+                    '".$idCaso."',
+                    '1',
                     '1'
                 )
             ";
@@ -519,6 +671,46 @@ class CoreController extends Controller{
                 '".$abogado."',
                 '".$idCaso."',
                 now(),
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Notificar
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$cliente."',
+                '1',
+                'Actividad registrada Generar cita contratación',
+                'Se ha registrado nueva actividad Generar cita contratación para el caso #".$idCaso."',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$abogado."',
+                '1',
+                'Actividad registrada Generar cita contratación',
+                'Se ha registrado nueva actividad Generar cita contratación para el caso #".$idCaso."',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
                 '1'
             )
         ";
@@ -1041,6 +1233,134 @@ class CoreController extends Controller{
 
         //  Retornar respuesta
         return response()->json($sql);
+
+    }
+
+    //  REGISTRAR SOLICITUD DE DOCUMENTOS
+
+    public function apiCoreSolicitarDocumentos(Request $request){
+
+        //  Parametros de entrada
+
+        $idCaso = $request->idCaso;
+        $cliente = $request->cliente;
+        $abogado = $request->abogado;
+        $estado = $request->estado;
+        $documentos = $request->documentos;
+        $motivo = $request->motivo;
+
+        //  Separar documentos
+        $documentosData = explode("|",$documentos);
+
+        //  Registrar solicitud de documentos
+
+        for($i = 0;$i < count($documentosData); $i++){
+
+            $sqlString = "
+                INSERT INTO documentos VALUES (
+                    '0',
+                    '".$idCaso."',
+                    '".$cliente."',
+                    '".$abogado."',
+                    '".$estado."',
+                    '".$documentosData[$i]."',
+                    '".$motivo."',
+                    '',
+                    ''
+                )
+            ";
+
+            DB::insert($sqlString);
+
+        }
+
+        //  Solicitud al administrador
+
+        $sqlString = "
+            INSERT INTO solicitudes VALUES (
+                '0',
+                '".$abogado."',
+                'Solicitud de documentos',
+                'Se requieren unos documentos para continuar con el caso por el motivo: ".$motivo."',
+                '1',
+                '".$idCaso."',
+                '0'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+    }
+
+    //  CONSULTAR SOLICITUD DE DOCUMENTOS
+
+    public function apiCoreGetSolicitudDocumentos(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Consultar documentos solicitados
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                documentos
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar respuesta
+        return response()->json($sql);
+
+    }
+
+    //  ACTUALIZAR DOCUMENTO SOLICITADO
+
+    public function apiCoreUpdateDocumentoSolicitado(Request $request){
+
+        //  Parametros de entrada
+        
+        $idDocumento = $request->idDocumento;
+        $base64 = $request->base64;
+
+        //  Actualizar documento
+
+        $sqlString = "
+            UPDATE
+                documentos
+            SET
+                documento = '".$base64."'
+            WHERE
+                id = '".$idDocumento."'
+        ";
+
+        DB::update($sqlString);
+
+    }
+
+    //  CONFIRMAR CARGA DE DOCUMENTOS
+
+    public function apiCoreConfirmarCargaDocumentos(Request $request){
+
+        //  Parametros de entrada
+        $idCaso = $request->idCaso;
+
+        //  Confirmar carga de documentos
+
+        $sqlString = "
+            UPDATE
+                documentos
+            SET
+                estado = '3'
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado = '2'
+        ";
+
+        DB::update($sqlString);
 
     }
 

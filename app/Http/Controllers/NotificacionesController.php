@@ -320,6 +320,61 @@ class NotificacionesController extends Controller{
 
         DB::insert($sqlString);
 
+        //  Registrar actividad de pago de asesoría para el abogado
+
+        $sqlString = "
+            INSERT INTO actividades VALUES (
+                '0',
+                '1',
+                '".$abogado."',
+                '".$idCaso."',
+                now(),
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Notificar
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$cliente."',
+                '1',
+                'Actividad registrada Pago de asesoría',
+                'Se ha registrado nueva actividad Pago de asesoría para el caso #".$idCaso."',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$abogado."',
+                '1',
+                'Actividad registrada Pago de asesoría',
+                'Se ha registrado nueva actividad Pago de asesoría para el caso #".$idCaso."',
+                '',
+                '',
+                '',
+                '0',
+                '".$idCaso."',
+                '1',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
     }
 
     //  APROBAR SOLICITUD DE REUNIÓN
@@ -415,7 +470,7 @@ class NotificacionesController extends Controller{
                     $cliente = $result->usuario;
 
                 $sqlString = "
-                    INSERT INTO actividades values (
+                    INSERT INTO actividades VALUES (
                         '0',
                         '3',
                         '".$cliente."',
@@ -430,7 +485,7 @@ class NotificacionesController extends Controller{
                 //  Crear actividad desición de continuidad abogado
 
                 $sqlString = "
-                    INSERT INTO actividades values (
+                    INSERT INTO actividades VALUES (
                         '0',
                         '3',
                         '".$abogado."',
@@ -455,6 +510,46 @@ class NotificacionesController extends Controller{
                 ";
 
                 DB::update($sqlString);
+
+                //  Notificar
+
+                $sqlString = "
+                    INSERT INTO notificaciones VALUES (
+                        '0',
+                        '".$cliente."',
+                        '1',
+                        'Actividad registrada Decisión de continuidad',
+                        'Se ha registrado nueva actividad Decisión de continuidad para el caso #".$idCaso."',
+                        '',
+                        '',
+                        '',
+                        '0',
+                        '".$idCaso."',
+                        '1',
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
+
+                $sqlString = "
+                    INSERT INTO notificaciones VALUES (
+                        '0',
+                        '".$abogado."',
+                        '1',
+                        'Actividad registrada Decisión de continuidad',
+                        'Se ha registrado nueva actividad Decisión de continuidad para el caso #".$idCaso."',
+                        '',
+                        '',
+                        '',
+                        '0',
+                        '".$idCaso."',
+                        '1',
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
 
             break;
 
@@ -503,6 +598,46 @@ class NotificacionesController extends Controller{
                 ";
 
                 DB::update($sqlString);
+
+                //  Notificar
+
+                $sqlString = "
+                    INSERT INTO notificaciones VALUES (
+                        '0',
+                        '".$cliente."',
+                        '1',
+                        'Actividad registrada Contratación',
+                        'Se ha registrado nueva actividad Contratación para el caso #".$idCaso."',
+                        '',
+                        '',
+                        '',
+                        '0',
+                        '".$idCaso."',
+                        '1',
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
+
+                $sqlString = "
+                    INSERT INTO notificaciones VALUES (
+                        '0',
+                        '".$abogado."',
+                        '1',
+                        'Actividad registrada Contratación',
+                        'Se ha registrado nueva actividad Contratación para el caso #".$idCaso."',
+                        '',
+                        '',
+                        '',
+                        '0',
+                        '".$idCaso."',
+                        '1',
+                        '1'
+                    )
+                ";
+
+                DB::insert($sqlString);
 
             break;
 

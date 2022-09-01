@@ -43,6 +43,8 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAdminAprobarContrato", "AdminController@apiAdminAprobarContrato");
   Route::match(['post', 'options'], "apiAdminRechazarContratoCliente", "AdminController@apiAdminRechazarContratoCliente");  
   Route::match(['post', 'options'], "apiAdminAprobarContratoCliente", "AdminController@apiAdminAprobarContratoCliente");
+  Route::match(['post', 'options'], "apiAdminAprobarSolicitudDocumentos", "AdminController@apiAdminAprobarSolicitudDocumentos");
+  Route::match(['post', 'options'], "apiAdminRechazarSolicitudDocumentos", "AdminController@apiAdminRechazarSolicitudDocumentos");
 
   //  Casos
 
@@ -86,6 +88,10 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiCoreGetContrato", "CoreController@apiCoreGetContrato");
   Route::match(['post', 'options'], "apiCoreGenerarContrato", "CoreController@apiCoreGenerarContrato");
   Route::match(['post', 'options'], "apiCoreConsultarCliente", "CoreController@apiCoreConsultarCliente");
+  Route::match(['post', 'options'], "apiCoreSolicitarDocumentos", "CoreController@apiCoreSolicitarDocumentos");
+  Route::match(['post', 'options'], "apiCoreGetSolicitudDocumentos", "CoreController@apiCoreGetSolicitudDocumentos");
+  Route::match(['post', 'options'], "apiCoreUpdateDocumentoSolicitado", "CoreController@apiCoreUpdateDocumentoSolicitado");
+  Route::match(['post', 'options'], "apiCoreConfirmarCargaDocumentos", "CoreController@apiCoreConfirmarCargaDocumentos");
 
   //  NOTIFICACIONES
 
