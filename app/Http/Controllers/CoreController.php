@@ -196,6 +196,12 @@ class CoreController extends Controller{
         $aprobacion = $request->aprobacion;
         $usuario = $request->usuario;
         $actividadDesc = $request->actividadDesc;
+        $motivo = $request->motivo;
+
+        //  Validar motivo
+
+        if($motivo)
+            $actividadDesc .= ", motivo: ".$motivo;
 
         //  Validar tipo de actividad
 
