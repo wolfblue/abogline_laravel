@@ -80,7 +80,7 @@ class UsuariosController extends Controller{
                     usuario = '".$usuario."' OR
                     email = '".$usuario."'
                 )   AND
-                password = '".$password."'
+                password = '".md5($password)."'
         ";
 
         $sql = DB::select($sqlString);
@@ -192,7 +192,7 @@ class UsuariosController extends Controller{
                 INSERT INTO usuarios VALUES (
                     '".$usuario."',
                     '".$email."',
-                    '".$password."',
+                    '".md5($password)."',
                     '".$perfil."',
                     '',
                     '',
@@ -253,7 +253,7 @@ class UsuariosController extends Controller{
 
             DB::insert($sqlString);
 
-            //  Enviar correo electronico
+            //  Enviar correo electronico para aprobación de la cuenta
 
             $mail = new PHPMailer(true);
 
@@ -385,7 +385,8 @@ class UsuariosController extends Controller{
                 SET
                     completa_perfil = 'true'
                 WHERE
-                    usuario = '".$usuario."'
+                    usuario = '".$usuario."' AND
+                    foto != ''
             ";
 
             DB::update($sqlString);

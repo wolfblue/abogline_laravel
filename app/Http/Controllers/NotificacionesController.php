@@ -160,7 +160,7 @@ class NotificacionesController extends Controller{
         $idNotificacion = $request->idNotificacion;
         $tipoNotificacion = $request->tipoNotificacion;
         $idCaso = $request->idCaso;
-        $abogado = $request->abogado;
+        $usuario = $request->usuario;
         $idCalendario = $request->idCalendario;
 
         //  Validar tipo de notifiación
@@ -169,8 +169,8 @@ class NotificacionesController extends Controller{
 
             case "2":{
 
-                //  Aprobar solicitud de consulta desde el abogado al cliente
-                $this->aprobarSolicitudConsultaCliente($idCaso,$abogado);
+                //  Aprobar solicitud de consulta
+                $this->aprobarSolicitudConsultaCliente($idCaso,$usuario);
 
             }
             break;
@@ -178,7 +178,7 @@ class NotificacionesController extends Controller{
             case "3":{
 
                 //  Aprobar solicitud de reunion
-                $this->aprobarSolicitudReunion($idCaso,$abogado,$idCalendario);
+                $this->aprobarSolicitudReunion($idCaso,$usuario,$idCalendario);
 
             }
             break;
@@ -202,7 +202,16 @@ class NotificacionesController extends Controller{
 
     //  APROBAR SOLICITUD DE CONSULTA DESDE EL ABOGADO AL CLIENTE
 
-    public function aprobarSolicitudConsultaCliente($idCaso,$abogado){
+    public function aprobarSolicitudConsultaCliente($idCaso, $usuario) {
+
+        //  Consultar abogado del caso
+
+        $sqlString = "SELECT abogado FROM casos_usuario where id_caso = '$idCaso'";
+        $sql = DB::select($sqlString);
+
+        foreach ($sql as $result) {
+            $abogado = $result->abogado;
+        }
 
         //  Actualizar relación del caso abogado cliente
 
@@ -210,6 +219,7 @@ class NotificacionesController extends Controller{
             UPDATE
                 casos_usuario
             SET
+                estado_usuario = 'aceptado',
                 estado_abogado = 'aceptado'
             WHERE
                 id_caso = '".$idCaso."' AND
@@ -231,46 +241,56 @@ class NotificacionesController extends Controller{
 
         DB::update($sqlString);
 
-        //  Enviar notificación al cliente
+        //  Validar quien hace la solicitud
+
+        $usuarioCaso = "";
+        $usuarioNotificacion = "";
+        $msgNotificacion = "";
+
+        $sqlString = "SELECT usuario FROM casos WHERE id = '".$idCaso."'";
+        $sql = DB::select($sqlString);
+
+        foreach ($sql as $result) {
+            $usuarioCaso = $result->usuario;
+        }
+
+        if ($usuarioCaso != $usuario) {
+            $usuarioNotificacion = $usuarioCaso;
+            $msgNotificacion = "El abogado aceptó la solicitud de consulta para el caso #".$idCaso;
+        } else {
+            $usuarioNotificacion = $abogado;
+            $msgNotificacion = "El cliente aceptó la solicitud de consulta para el caso #".$idCaso;
+        }
+
+        //  Enviar notificación
 
         $sqlString = "
             SELECT
-                usuario,
                 email
             FROM
                 usuarios
             WHERE
-                usuario IN (
-                    SELECT
-                        usuario
-                    FROM
-                        casos
-                    WHERE
-                        id = '".$idCaso."'
-                )
+                usuario = '".$usuarioNotificacion."'
         ";
 
         $sql = DB::select($sqlString);
 
-        foreach($sql as $result){
-
-            $cliente = $result->usuario;
+        foreach ($sql as $result) {
             $email = $result->email;
-
         }
 
         $sqlString = "
             INSERT INTO notificaciones values (
                 '0',
-                '".$cliente."',
+                '".$usuarioNotificacion."',
                 '1',
                 'Solicitud aceptada para consulta del caso #".$idCaso."',
-                'El abogado aceptó la solicitud de consulta para el caso #".$idCaso."',
+                '$msgNotificacion',
                 '',
                 '',
                 '',
                 '0',
-                '".$idCaso."',
+                '$idCaso',
                 '1',
                 '1'
             )
@@ -278,20 +298,20 @@ class NotificacionesController extends Controller{
 
         DB::insert($sqlString);
 
-        //  Enviar correo electrónico al cliente
+        //  Enviar correo electrónico
 
         $mail = new PHPMailer(true);
-
+        
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
         $mail->Host = 'smtp.hostinger.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'administrador@abogline.com';
+        $mail->Username = \Config::get('values.emailAdministrador');
         $mail->Password = '4riK5YuDZy*E$7h';
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
+        $mail->setFrom(\Config::get('values.emailAdministrador'), \Config::get('values.emailAdministrador'));
         $mail->addAddress($email);
 
         $mail->isHTML(true);
@@ -299,7 +319,7 @@ class NotificacionesController extends Controller{
 
         $mail->Subject = "Abogline: Solicitud aceptada para consulta del caso #".$idCaso;
 
-        $html = "El abogado aceptó la solicitud de consulta para el caso #".$idCaso;
+        $html = $msgNotificacion;
 
         $mail->Body = $html;
 
@@ -311,7 +331,7 @@ class NotificacionesController extends Controller{
             INSERT INTO actividades VALUES (
                 '0',
                 '1',
-                '".$cliente."',
+                '".$usuarioCaso."',
                 '".$idCaso."',
                 now(),
                 '1'
@@ -340,15 +360,15 @@ class NotificacionesController extends Controller{
         $sqlString = "
             INSERT INTO notificaciones VALUES (
                 '0',
-                '".$cliente."',
+                '".$usuarioCaso."',
                 '1',
                 'Actividad registrada Pago de asesoría',
-                'Se ha registrado nueva actividad Pago de asesoría para el caso #".$idCaso."',
+                'Se ha registrado nueva actividad Pago de asesoría para el caso #$idCaso',
                 '',
                 '',
                 '',
                 '0',
-                '".$idCaso."',
+                '$idCaso',
                 '1',
                 '1'
             )
@@ -379,7 +399,16 @@ class NotificacionesController extends Controller{
 
     //  APROBAR SOLICITUD DE REUNIÓN
 
-    public function aprobarSolicitudReunion($idCaso,$abogado,$idCalendario){
+    public function aprobarSolicitudReunion($idCaso, $usuario, $idCalendario) {
+
+        //  Consultar abogado del caso
+
+        $sqlString = "SELECT abogado FROM casos_usuario where id_caso = '$idCaso'";
+        $sql = DB::select($sqlString);
+
+        foreach ($sql as $result) {
+            $abogado = $result->abogado;
+        }
 
         //  Obtener cliente
 
@@ -642,6 +671,20 @@ class NotificacionesController extends Controller{
             break;
 
         }
+
+    }
+
+    //  CONSULTAR INFORMACIÓN DEL CASO
+
+    public function apiNotificacionesGetCaso(Request $request){
+
+        $idCaso = $request->idCaso;
+
+        $sqlString = "SELECT * FROM casos WHERE id = '".$idCaso."'";
+
+        $sql = DB::select($sqlString);
+
+        return response()->json($sql);
 
     }
 

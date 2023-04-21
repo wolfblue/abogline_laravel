@@ -221,6 +221,7 @@ class CasosController extends Controller{
                 id,
                 problemas,
                 trata_caso,
+                REPLACE(trata_caso,' ','') as trata_caso_icon,
                 proceso,
                 cuentanos,
                 cual_problema,
@@ -390,15 +391,34 @@ class CasosController extends Controller{
 
         }
 
+        //  Validar si es un abogado o cliente realizando la solicitud
+
+        $usuarioCaso = "";
+        $usuarioNotificacion = "";
+        $msgNotificacion = "";
+        $sqlString = "SELECT usuario FROM casos WHERE id = '".$idCaso."'";
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $usuarioCaso = $result->usuario;
+
+        if($usuarioCaso != $abogado){
+            $usuarioNotificacion = $usuarioCaso;
+            $msgNotificacion = "Un abogado quiere ponerse en contacto contigo para una consulta del caso #".$idCaso;
+        }else{
+            $usuarioNotificacion = $abogado;
+            $msgNotificacion = "Un cliente quiere ponerse en contacto contigo para una consulta del caso #".$idCaso;
+        }
+
         //  Notificar al abogado
 
         $sqlString = "
             INSERT INTO notificaciones values (
                 '0',
-                '".$abogado."',
+                '".$usuarioNotificacion."',
                 '1',
                 'Solicitud de consulta para un caso',
-                'Un cliente quiere ponerse en contacto contigo para una consulta del caso #".$idCaso."',
+                '".$msgNotificacion."',
                 '',
                 '',
                 '',
@@ -419,7 +439,7 @@ class CasosController extends Controller{
             FROM
                 usuarios
             WHERE
-                usuario = '".$abogado."'
+                usuario = '".$usuarioNotificacion."'
         ";
 
         $sql = DB::select($sqlString);
@@ -446,7 +466,8 @@ class CasosController extends Controller{
 
         $mail->Subject = "Abogline: Solicitud de consulta para un caso";
 
-        $html = "Un cliente quiere ponerse en contacto contigo para una consulta del caso #".$idCaso;
+
+        $html = $msgNotificacion;
 
         $mail->Body = $html;
 

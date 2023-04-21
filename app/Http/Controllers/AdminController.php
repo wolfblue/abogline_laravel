@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use App\Http\Controllers\FunctionsController;
 
 class AdminController extends Controller{
 
@@ -922,6 +923,8 @@ class AdminController extends Controller{
         //  Parametros de entrada
         $idCaso = $request->idCaso;
 
+        $functions = new FunctionsController();
+
         //  Aprobar contrato al abogado
 
         $sqlString = "
@@ -971,6 +974,20 @@ class AdminController extends Controller{
         ";
 
         DB::insert($sqlString);
+
+        //  Consultar caso
+        $casos = $functions->casosConsultar($idCaso);
+
+        //  Consultar casos usuario 
+        $casosUsuario = $functions->casosUsuarioConsultar($idCaso);
+
+        //  Crear actividades
+
+        //$functions->actividadesCrear('12', $casos[0]->usuario, $idCaso, '1');
+        //$functions->actividadesCrear('12', $casosUsuario[0]->abogado, $idCaso, '2');
+
+        //  Activar actividades abogado
+        $functions->casosActualizar($idCaso, "estado = '4'");
 
     }
 
@@ -1087,6 +1104,126 @@ class AdminController extends Controller{
                 id = '".$idSolicitud."'
         ";
 
+        DB::update($sqlString);
+
+    }
+
+    //  ACTUALIZAR ROLES DEL USUARIO
+
+    public function apiAdminActualizarRoles(Request $request){
+
+        //  Parametros de entrada
+
+        $usuario = $request->usuario;
+        $roles = $request->roles;
+
+        //  Eliminar roles del usuario
+
+        $sqlString = "DELETE FROM usuarios_roles WHERE usuario = '".$usuario."'";
+        DB::delete($sqlString);
+
+        //  Actualizar roles
+
+        $rolesData = explode("|",$roles);
+
+        for($i = 0; $i < count($rolesData); $i++){
+
+            $rol = $rolesData[$i];
+
+            $sqlString = "
+                INSERT INTO usuarios_roles VALUES (
+                    '".$usuario."',
+                    '".$rol."'
+                )
+            ";
+
+            DB::insert($sqlString);   
+
+        }
+
+    }
+
+    //  OBTENER ROLES DE UN USUARIO
+
+    public function apiAdminObtenerRoles(Request $request){
+
+        //  Parametros de entrada
+        $usuario = $request->usuario;
+
+        //  Obtener roles de un usuario
+
+        $sqlString = "
+            SELECT
+                *
+            FROM
+                usuarios_roles
+            WHERE
+                usuario = '".$usuario."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        //  Retornar roles del usuario
+        return response()->json($sql);
+
+    }
+
+    //  OBTENER PERSONALIZACIÓN
+
+    public function apiAdminObtenerPersonalizar(Request $request){
+
+        //  Consultar datos
+
+        $sqlString = "SELECT * FROM personalizar ORDER BY 1";
+        $sql = DB::select($sqlString);
+
+        //  Retornar datos
+        return response()->json($sql);
+
+    }
+
+    //  ACTUALIZAR ATRIBUTO DE PERSONALIZACIÓN
+
+    public function actualizarAtributoPersonalizar(Request $request){
+
+        //  Parametros de entrada
+
+        $atributo = $request->atributo;
+        $valor = $request->valor;
+
+        //  Actualizar atributo
+
+        $sqlString = "UPDATE personalizar SET valor = '".$valor."' WHERE atributo = '".$atributo."'";
+        DB::update($sqlString);
+
+    }
+
+    //  OBTENER PERSONALIZACIÓN
+
+    public function apiAdminObtenerTextos(Request $request){
+
+        //  Consultar datos
+
+        $sqlString = "SELECT * FROM textos ORDER BY 1";
+        $sql = DB::select($sqlString);
+
+        //  Retornar datos
+        return response()->json($sql);
+
+    }
+
+    //  ACTUALIZAR ATRIBUTO DE PERSONALIZACIÓN
+
+    public function actualizarAtributoTextos(Request $request){
+
+        //  Parametros de entrada
+
+        $atributo = $request->atributo;
+        $valor = $request->valor;
+
+        //  Actualizar atributo
+
+        $sqlString = "UPDATE textos SET valor = '".$valor."' WHERE atributo = '".$atributo."'";
         DB::update($sqlString);
 
     }

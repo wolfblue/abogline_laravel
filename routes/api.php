@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => ['cors']], function () {
 
-  //  Administrador
+  //  ADMINISTRADOR
   
   Route::match(['post', 'options'], "apiAdminCiudadRegister", "AdminController@apiAdminCiudadRegister");
   Route::match(['post', 'options'], "apiAdminCiudadGet", "AdminController@apiAdminCiudadGet");
@@ -45,15 +45,22 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiAdminAprobarContratoCliente", "AdminController@apiAdminAprobarContratoCliente");
   Route::match(['post', 'options'], "apiAdminAprobarSolicitudDocumentos", "AdminController@apiAdminAprobarSolicitudDocumentos");
   Route::match(['post', 'options'], "apiAdminRechazarSolicitudDocumentos", "AdminController@apiAdminRechazarSolicitudDocumentos");
+  Route::match(['post', 'options'], "apiAdminActualizarRoles", "AdminController@apiAdminActualizarRoles");
+  Route::match(['post', 'options'], "apiAdminObtenerRoles", "AdminController@apiAdminObtenerRoles");
+  Route::match(['post', 'options'], "apiAdminObtenerPersonalizar", "AdminController@apiAdminObtenerPersonalizar");
+  Route::match(['post', 'options'], "actualizarAtributoPersonalizar", "AdminController@actualizarAtributoPersonalizar");
+  Route::match(['post', 'options'], "apiAdminObtenerTextos", "AdminController@apiAdminObtenerTextos");
+  Route::match(['post', 'options'], "actualizarAtributoTextos", "AdminController@actualizarAtributoTextos");
 
-  //  Casos
+
+  //  CASOS
 
   Route::match(['post', 'options'], "apiRegistrarCaso", "CasosController@apiRegistrarCaso");
   Route::match(['post', 'options'], "apiConsultarCasos", "CasosController@apiConsultarCasos");
   Route::match(['post', 'options'], "apiEliminarCaso", "CasosController@apiEliminarCaso");
   Route::match(['post', 'options'], "apiCasosUsuarioAsociarAbogado", "CasosController@apiCasosUsuarioAsociarAbogado");
 
-  //  Usuarios
+  //  USUARIOS
 
   Route::match(['post', 'options'], "apiUsuariosGetUser", "UsuariosController@apiUsuariosGetUser");
   Route::match(['post', 'options'], "apiUsuariosInsertUser", "UsuariosController@apiUsuariosInsertUser");
@@ -100,8 +107,9 @@ Route::group(['middleware' => ['cors']], function () {
   Route::match(['post', 'options'], "apiRechazarNotificacionReunion", "NotificacionesController@apiRechazarNotificacionReunion");
   Route::match(['post', 'options'], "apiEliminarNotificacion", "NotificacionesController@apiEliminarNotificacion");
   Route::match(['post', 'options'], "apiNotificacionesAprobar", "NotificacionesController@apiNotificacionesAprobar");
+  Route::match(['post', 'options'], "apiNotificacionesGetCaso", "NotificacionesController@apiNotificacionesGetCaso");
 
-  //  Calendario
+  //  CALENDARIO
 
   Route::match(['post', 'options'], "apiConsultarCalendario", "CalendarioController@apiConsultarCalendario");
   Route::match(['post', 'options'], "apiAsignarLinkReunion", "CalendarioController@apiAsignarLinkReunion");

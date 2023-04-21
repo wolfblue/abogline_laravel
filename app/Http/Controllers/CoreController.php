@@ -209,11 +209,11 @@ class CoreController extends Controller{
 
         switch($actividad){
 
-            case "paso7_finalizar_contrato":
+            case "paso7_finalizar_contrato_2":
                 $tipoActividad = "6";
             break;
 
-            case "paso8_pagos":
+            case "paso8_pagos_2":
                 $tipoActividad = "7";
             break;
 
@@ -225,7 +225,7 @@ class CoreController extends Controller{
                 $tipoActividad = "9";
             break;
 
-            case "paso11_reunion_presencial":
+            case "paso11_reunion_presencial_2":
                 $tipoActividad = "10";
             break;
 
