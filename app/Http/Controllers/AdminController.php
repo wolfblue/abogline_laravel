@@ -335,7 +335,8 @@ class AdminController extends Controller{
             UPDATE 
                 usuarios
             SET
-                estado = '2'
+                estado = '2',
+                aprobado = 'true'
             WHERE
                 usuario = '".$usuario."'
         ";

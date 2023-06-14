@@ -398,6 +398,14 @@ class UsuariosController extends Controller{
             else
                 $mensaje = "Felicitaciones, ha completado su perfil, ahora puede buscar un caso.";
 
+            DB::delete("
+                DELETE FROM
+                    notificaciones
+                WHERE
+                    usuario = '".$usuario."' AND
+                    mensaje = '".$mensaje."'
+            ");
+
             $sqlString = "
                 INSERT INTO notificaciones values (
                     '0',
