@@ -12,3 +12,4 @@ npm-debug.log
 yarn-error.log
 /config/values.php
 composer.lock
+.env
