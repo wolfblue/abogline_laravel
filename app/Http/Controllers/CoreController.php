@@ -110,13 +110,31 @@ class CoreController extends Controller{
         $abogado = $request->abogado;
         $titleReunion = $request->titleReunion;
 
-        //  Registrar evento
+        //  Registrar evento 1
 
         $sqlString = "
             INSERT INTO calendario VALUES (
                 '0',
                 '".$idCaso."',
                 '".$fechaDesde."',
+                '".$fechaDesde."',
+                '1',
+                '',
+                '".$usuario."',
+                '".$abogado."',
+                '".$titleReunion."'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Registrar evento 2
+
+        $sqlString = "
+            INSERT INTO calendario VALUES (
+                '0',
+                '".$idCaso."',
+                '".$fechaHasta."',
                 '".$fechaHasta."',
                 '1',
                 '',
@@ -128,7 +146,7 @@ class CoreController extends Controller{
 
         DB::insert($sqlString);
 
-        //  Insertar notificación al abogado
+        //  Insertar notificación al abogado evento 1
 
         $idCalendario = "0";
 
@@ -170,7 +188,62 @@ class CoreController extends Controller{
                 '".$abogado."',
                 '1',
                 'Solicitud de ".$titleReunion."',
-                'El cliente ha solicitado ".$titleReunion." para el caso #".$idCaso." para la siguiente fecha: ".$fechaDesde." - ".$fechaHasta."',
+                'El cliente ha solicitado ".$titleReunion." para el caso #".$idCaso." primera opción de fecha: ".$fechaDesde."',
+                '',
+                '',
+                'idCaso',
+                '".$idCalendario."',
+                '".$idCaso."',
+                '3',
+                '1'
+            )
+        ";
+
+        DB::insert($sqlString);
+
+        //  Insertar notificación al abogado evento 2
+
+        $idCalendario = "0";
+
+        $sqlString = "
+            SELECT
+                MAX(id) AS id
+            FROM
+                calendario
+            WHERE
+                id_caso = '".$idCaso."'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $idCalendario = $result->id;
+
+        $abogado = "";
+
+        $sqlString = "
+            SELECT
+                abogado
+            FROM
+                casos_usuario
+            WHERE
+                id_caso = '".$idCaso."' AND
+                estado_usuario = 'aceptado' AND
+                estado_abogado = 'aceptado'
+        ";
+
+        $sql = DB::select($sqlString);
+
+        foreach($sql as $result)
+            $abogado = $result->abogado;
+
+        $sqlString = "
+            INSERT INTO notificaciones VALUES (
+                '0',
+                '".$abogado."',
+                '1',
+                'Solicitud de ".$titleReunion."',
+                'El cliente ha solicitado ".$titleReunion." para el caso #".$idCaso." segunda opción fecha: ".$fechaHasta."',
                 '',
                 '',
                 'idCaso',

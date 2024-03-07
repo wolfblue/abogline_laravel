@@ -180,6 +180,9 @@ class NotificacionesController extends Controller{
                 //  Aprobar solicitud de reunion
                 $this->aprobarSolicitudReunion($idCaso,$usuario,$idCalendario);
 
+                //  Eliminar notificaciones de asesoría no aprobada
+                $this->eliminarNotificacionesAsesoria($idNotificacion);
+
             }
             break;
 
@@ -306,12 +309,12 @@ class NotificacionesController extends Controller{
         $mail->isSMTP();
         $mail->Host = 'smtp.hostinger.com';
         $mail->SMTPAuth = true;
-        $mail->Username = \Config::get('values.emailAdministrador');
+        $mail->Username = 'administrador@abogline.com';
         $mail->Password = '4riK5YuDZy*E$7h';
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        $mail->setFrom(\Config::get('values.emailAdministrador'), \Config::get('values.emailAdministrador'));
+        $mail->setFrom('administrador@abogline.com', 'administrador@abogline.com');
         $mail->addAddress($email);
 
         $mail->isHTML(true);
@@ -685,6 +688,16 @@ class NotificacionesController extends Controller{
         $sql = DB::select($sqlString);
 
         return response()->json($sql);
+
+    }
+
+    //  ELIMINAR NOTIFICACIONES DE ASESORIA NO APROBADA
+
+    public function eliminarNotificacionesAsesoria($idNotificacion){
+        
+        $sqlString = "DELETE FROM notificaciones WHERE id != '".$idNotificacion."' AND tipo_notificacion = '3'";
+
+        DB::delete($sqlString);
 
     }
 
